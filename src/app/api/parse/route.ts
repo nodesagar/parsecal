@@ -83,7 +83,7 @@ export async function POST(request: Request) {
         const textInput = formData.get('textInput') as string | null;
         const file = formData.get('file') as File | null;
 
-        if (!inputType || (inputType === 'text' && !textInput) || (inputType !== 'text' && !file)) {
+        if (!['pdf', 'image', 'text'].includes(inputType) || (inputType === 'text' && !textInput) || (inputType !== 'text' && !file)) {
             return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
         }
 
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
             .insert({
                 id: sessionId,
                 user_id: user.id,
-                title: sessionTitle,
+                title: sessionTitle || 'Untitled Session',
                 input_type: inputType,
                 input_file_path: filePath,
                 raw_text_input: textInput || null,
@@ -186,25 +186,33 @@ export async function POST(request: Request) {
         // Try providers with fallback
         let events: ParsedEventFromAI[] = [];
         let lastError: Error | null = null;
+        let success = false;
 
         for (const provider of providers) {
-            try {
-                events = await provider.parse(parseInput);
-                break;
-            } catch (err) {
-                lastError = err as Error;
-                // If rate limited, try next provider
-                if ((err as { status?: number }).status === 429) continue;
-                // If JSON parse error, retry once with same provider
-                if (err instanceof SyntaxError) {
-                    try {
-                        events = await provider.parse(parseInput);
+            if (success) break;
+
+            const maxRetries = 2; // Initial try + 1 retry for syntax errors
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    events = await provider.parse(parseInput);
+                    success = true;
+                    break; // Successfully parsed, break retry loop
+                } catch (err) {
+                    lastError = err as Error;
+
+                    // If rate limited, don't retry same provider, move to next provider
+                    if ((err as { status?: number }).status === 429) {
                         break;
-                    } catch {
+                    }
+
+                    // If JSON parse error, retry once with same provider
+                    if (err instanceof SyntaxError && attempt < maxRetries) {
                         continue;
                     }
+
+                    // Other errors or out of retries, break internal loop to move to next provider
+                    break;
                 }
-                continue;
             }
         }
 

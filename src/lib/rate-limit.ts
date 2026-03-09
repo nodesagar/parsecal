@@ -3,8 +3,7 @@
  * Tracks requests per key (IP or user ID) using a sliding window.
  *
  * NOTE: This works per-instance. On serverless (Vercel), each cold start
- * gets a fresh map, so this is best-effort. For stricter limits,
- * use Upstash Redis rate limiting.
+ * gets a fresh map, so this is best-effort.
  */
 
 type RateLimitEntry = {
@@ -12,15 +11,6 @@ type RateLimitEntry = {
 };
 
 const store = new Map<string, RateLimitEntry>();
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-    const now = Date.now();
-    for (const [key, entry] of store.entries()) {
-        entry.timestamps = entry.timestamps.filter((t) => now - t < 60_000 * 10);
-        if (entry.timestamps.length === 0) store.delete(key);
-    }
-}, 5 * 60_000);
 
 export type RateLimitConfig = {
     /** Max requests allowed in the window */
@@ -36,8 +26,17 @@ export function checkRateLimit(
     const now = Date.now();
     const entry = store.get(key) || { timestamps: [] };
 
-    // Remove timestamps outside the window
+    // Lazy cleanup for this specific entry
     entry.timestamps = entry.timestamps.filter((t) => now - t < config.windowMs);
+
+    // Periodic lazy cleanup of the entire store to prevent unrestricted growth
+    // (runs every ~100 requests to save overhead)
+    if (Math.random() < 0.01) {
+        for (const [k, v] of store.entries()) {
+            v.timestamps = v.timestamps.filter((t) => now - t < config.windowMs);
+            if (v.timestamps.length === 0) store.delete(k);
+        }
+    }
 
     if (entry.timestamps.length >= config.maxRequests) {
         const oldestInWindow = entry.timestamps[0];
