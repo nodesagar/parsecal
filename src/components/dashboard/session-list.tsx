@@ -74,7 +74,6 @@ export default function SessionList({ sessions: initialSessions }: { sessions: P
     }, [sessions, statusFilter, search]);
 
     const allFilteredSelected = filtered.length > 0 && filtered.every((s) => selectedIds.has(s.id));
-    const someFilteredSelected = filtered.some((s) => selectedIds.has(s.id));
 
     function toggleSelect(id: string) {
         setSelectedIds((prev) => {
