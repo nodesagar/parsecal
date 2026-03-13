@@ -41,8 +41,9 @@ DATE_PLACEHOLDER
 `;
 
 export function buildPrompt(timezone: string): string {
-    const today = new Date().toISOString().split('T')[0];
-    return EXTRACTION_PROMPT
-        .replace('TIMEZONE_PLACEHOLDER', timezone)
-        .replace('DATE_PLACEHOLDER', today);
+  const today = new Date().toISOString().split("T")[0];
+  return EXTRACTION_PROMPT.replace("TIMEZONE_PLACEHOLDER", timezone).replace(
+    "DATE_PLACEHOLDER",
+    today,
+  );
 }
