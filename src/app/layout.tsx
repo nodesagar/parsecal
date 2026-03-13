@@ -5,7 +5,14 @@ export const metadata: Metadata = {
   title: "CalendarAI — Smart Calendar from Any Format",
   description:
     "Upload PDFs, images, or text — AI extracts events and pushes them to your calendar. No more manual event creation.",
-  keywords: ["calendar", "AI", "schedule", "event parser", "OCR", "productivity"],
+  keywords: [
+    "calendar",
+    "AI",
+    "schedule",
+    "event parser",
+    "OCR",
+    "productivity",
+  ],
 };
 
 export default function RootLayout({
@@ -15,7 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen bg-bg text-text" suppressHydrationWarning>
+      <body
+        className="antialiased min-h-screen bg-bg text-text"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

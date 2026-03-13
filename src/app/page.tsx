@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Calendar,
   FileText,
@@ -8,7 +8,7 @@ import {
   Sparkles,
   CheckCircle2,
   Zap,
-} from 'lucide-react';
+} from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -42,15 +42,15 @@ export default function LandingPage() {
           AI-Powered Calendar Management
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold text-text leading-tight mb-6">
-          Turn any schedule into{' '}
+          Turn any schedule into{" "}
           <span className="text-primary">calendar events</span>
           <br />
           in seconds
         </h1>
         <p className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
           Upload a PDF, snap a photo of a timetable, or paste text — CalendarAI
-          extracts every event and pushes them to your Google or Outlook calendar.
-          No more manual entry.
+          extracts every event and pushes them to your Google or Outlook
+          calendar. No more manual entry.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
@@ -75,18 +75,18 @@ export default function LandingPage() {
           {[
             {
               icon: Image,
-              title: 'Images & Photos',
-              desc: 'Screenshots, whiteboard photos, handwritten notes — even messy ones.',
+              title: "Images & Photos",
+              desc: "Screenshots, whiteboard photos, handwritten notes — even messy ones.",
             },
             {
               icon: FileText,
-              title: 'PDF Documents',
-              desc: 'Conference agendas, class syllabi, travel itineraries.',
+              title: "PDF Documents",
+              desc: "Conference agendas, class syllabi, travel itineraries.",
             },
             {
               icon: Type,
-              title: 'Plain Text',
-              desc: 'Paste text from emails, group chats, or any message.',
+              title: "Plain Text",
+              desc: "Paste text from emails, group chats, or any message.",
             },
           ].map((item) => (
             <div
@@ -96,8 +96,12 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-primary/10 rounded-[10px] flex items-center justify-center mx-auto mb-4">
                 <item.icon className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-text mb-2">{item.title}</h3>
-              <p className="text-sm text-text-muted leading-relaxed">{item.desc}</p>
+              <h3 className="text-lg font-semibold text-text mb-2">
+                {item.title}
+              </h3>
+              <p className="text-sm text-text-muted leading-relaxed">
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -111,22 +115,22 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              step: '1',
-              color: 'bg-primary',
-              title: 'Upload',
-              desc: 'Drop a file, take a photo, or paste text with schedule info.',
+              step: "1",
+              color: "bg-primary",
+              title: "Upload",
+              desc: "Drop a file, take a photo, or paste text with schedule info.",
             },
             {
-              step: '2',
-              color: 'bg-warning',
-              title: 'Review',
-              desc: 'AI extracts events. Review, edit, and confirm the draft.',
+              step: "2",
+              color: "bg-warning",
+              title: "Review",
+              desc: "AI extracts events. Review, edit, and confirm the draft.",
             },
             {
-              step: '3',
-              color: 'bg-success',
-              title: 'Push',
-              desc: 'One click — events land in your Google or Outlook calendar.',
+              step: "3",
+              color: "bg-success",
+              title: "Push",
+              desc: "One click — events land in your Google or Outlook calendar.",
             },
           ].map((item) => (
             <div key={item.step} className="text-center">
@@ -135,8 +139,12 @@ export default function LandingPage() {
               >
                 {item.step}
               </div>
-              <h3 className="text-lg font-semibold text-text mb-2">{item.title}</h3>
-              <p className="text-sm text-text-muted leading-relaxed">{item.desc}</p>
+              <h3 className="text-lg font-semibold text-text mb-2">
+                {item.title}
+              </h3>
+              <p className="text-sm text-text-muted leading-relaxed">
+                {item.desc}
+              </p>
             </div>
           ))}
         </div>
@@ -149,14 +157,14 @@ export default function LandingPage() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
-            'Handwritten note recognition',
-            'Multi-provider AI (Gemini, GPT, Claude)',
-            'Google Calendar & Outlook integration',
-            'Confidence scores for each event',
-            'Inline editing before push',
-            '.ics export for any calendar',
-            'Bring your own API key',
-            'Recurring event support',
+            "Handwritten note recognition",
+            "Multi-provider AI (Gemini, GPT, Claude)",
+            "Google Calendar & Outlook integration",
+            "Confidence scores for each event",
+            "Inline editing before push",
+            ".ics export for any calendar",
+            "Bring your own API key",
+            "Recurring event support",
           ].map((feature) => (
             <div
               key={feature}

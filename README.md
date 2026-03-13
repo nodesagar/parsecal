@@ -1,10 +1,10 @@
 # 📅 ParseCal
 
-> *Turn PDFs, images, and text into calendar events — powered by AI.*
+> _Turn PDFs, images, and text into calendar events — powered by AI._
 
-Ever received a class timetable as a PDF and wished it would just *appear* in your calendar? Yeah, me too. That's why I built ParseCal.
+Ever received a class timetable as a PDF and wished it would just _appear_ in your calendar? Yeah, me too. That's why I built ParseCal.
 
-Drop in any schedule — a university timetable, conference agenda, meeting list, or just some messy text — and let AI do the heavy lifting. Review the extracted events, tweak what you need, and push them straight to Google Calendar. Done.
+Drop in any schedule — a university timetable, conference agenda, meeting list, or just some messy text — and let AI do the heavy lifting. Review the extracted events, tweak what you need, and push them straight to Google or Outlook Calendar. Done.
 
 ---
 
@@ -13,7 +13,7 @@ Drop in any schedule — a university timetable, conference agenda, meeting list
 - 📄 **Multi-format input** — Upload PDFs, images, or paste plain text
 - 🤖 **AI-powered parsing** — Gemini (primary), OpenAI, and Claude with automatic fallback
 - ✏️ **Event review & editing** — Edit titles, dates, times, location, description, and recurrence rules before pushing
-- 📆 **Google Calendar push** — OAuth2-based integration to push events directly
+- 📆 **Google + Outlook push** — OAuth2-based integration to push events directly
 - 📥 **ICS export** — Download `.ics` files for any calendar app
 - 🔍 **Session management** — Search, filter by status, multi-select, and bulk delete
 - 🏷️ **Auto-generated titles** — Session names derived from filenames or content
@@ -22,16 +22,16 @@ Drop in any schedule — a university timetable, conference agenda, meeting list
 
 ## 🛠️ Tech Stack
 
-| Layer | Tech |
-|-------|------|
-| Framework | Next.js 16 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS 4 |
-| Auth & DB | Supabase (PostgreSQL, Auth, Storage) |
-| AI | Google Gemini, OpenAI, Anthropic Claude |
-| Calendar | Google Calendar API, ical-generator |
-| Validation | Zod |
-| Icons | Lucide React |
+| Layer      | Tech                                                     |
+| ---------- | -------------------------------------------------------- |
+| Framework  | Next.js 16 (App Router)                                  |
+| Language   | TypeScript                                               |
+| Styling    | Tailwind CSS 4                                           |
+| Auth & DB  | Supabase (PostgreSQL, Auth, Storage)                     |
+| AI         | Google Gemini, OpenAI, Anthropic Claude                  |
+| Calendar   | Google Calendar API, Microsoft Graph API, ical-generator |
+| Validation | Zod                                                      |
+| Icons      | Lucide React                                             |
 
 ## 🚀 Getting Started
 
@@ -40,7 +40,8 @@ Drop in any schedule — a university timetable, conference agenda, meeting list
 - Node.js 18+
 - A [Supabase](https://supabase.com) project
 - At least one AI provider API key (Gemini recommended)
-- Google Cloud project with Calendar API enabled (for push)
+- Google Cloud project with Calendar API enabled (for Google push)
+- Microsoft Entra app with Graph Calendar permissions (for Outlook push)
 
 ### 1. Clone & install
 
@@ -65,9 +66,17 @@ OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key
 
 # Google Calendar OAuth
-GOOGLE_CLIENT_ID=your_client_id
-GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_CALENDAR_CLIENT_ID=your_client_id
+GOOGLE_CALENDAR_CLIENT_SECRET=your_client_secret
 GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/calendar/google/callback
+
+# Microsoft Outlook OAuth
+MICROSOFT_CLIENT_ID=your_client_id
+MICROSOFT_CLIENT_SECRET=your_client_secret
+MICROSOFT_REDIRECT_URI=http://localhost:3000/api/auth/calendar/outlook/callback
+
+# App URL used by OAuth fallback redirects
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### 3. Database setup
@@ -100,7 +109,7 @@ src/
 │   └── dashboard/        # Session list (search, filters, multi-select)
 ├── lib/
 │   ├── ai/               # Provider abstraction (Gemini, OpenAI, Claude)
-│   ├── calendar/          # Google Calendar integration
+│   ├── calendar/          # Google + Outlook calendar integrations
 │   └── supabase/          # Client, server, middleware helpers
 └── types/                 # TypeScript types
 ```
@@ -110,7 +119,7 @@ src/
 1. **Upload** a PDF, image, or paste text on the parse page
 2. **AI extracts** structured events (title, date, time, location, recurrence)
 3. **Review & edit** events — adjust details, add custom recurrence rules
-4. **Push** to Google Calendar or **export** as `.ics`
+4. **Push** to Google/Outlook Calendar or **export** as `.ics`
 
 ## 💡 Why I Built This
 
@@ -133,7 +142,6 @@ If you like this project or want to chat about web dev, AI, or side projects —
 
 Built with ❤️ and ☕ by **Sagar**
 
-*If you found this project cool, consider giving it a ⭐!*
+_If you found this project cool, consider giving it a ⭐!_
 
 </div>
-

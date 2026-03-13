@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================
 // AI Parsed Event Schema
@@ -33,8 +33,8 @@ export type Profile = {
   display_name: string;
   avatar_url: string | null;
   default_timezone: string;
-  preferred_calendar_provider: 'google' | 'outlook' | 'manual';
-  preferred_ai_provider: 'gemini' | 'openai' | 'claude';
+  preferred_calendar_provider: "google" | "outlook" | "manual";
+  preferred_ai_provider: "gemini" | "openai" | "claude";
   custom_ai_api_key: string | null;
   monthly_parse_count: number;
   monthly_parse_reset_at: string;
@@ -45,7 +45,7 @@ export type Profile = {
 export type ConnectedCalendar = {
   id: string;
   user_id: string;
-  provider: 'google' | 'outlook';
+  provider: "google" | "outlook";
   access_token: string;
   refresh_token: string;
   token_expires_at: string;
@@ -60,11 +60,11 @@ export type ParseSession = {
   id: string;
   user_id: string;
   title: string | null;
-  input_type: 'pdf' | 'image' | 'text';
+  input_type: "pdf" | "image" | "text";
   input_file_path: string | null;
   raw_text_input: string | null;
-  ai_provider_used: 'gemini' | 'openai' | 'claude';
-  status: 'processing' | 'draft' | 'pushed' | 'partially_pushed' | 'failed';
+  ai_provider_used: "gemini" | "openai" | "claude";
+  status: "processing" | "draft" | "pushed" | "partially_pushed" | "failed";
   event_count: number;
   error_message: string | null;
   created_at: string;
@@ -96,10 +96,10 @@ export type ParsedEvent = {
 // AI Provider Types
 // ============================================
 
-export type AIProviderName = 'gemini' | 'openai' | 'claude';
+export type AIProviderName = "gemini" | "openai" | "claude";
 
 export type ParseInput = {
-  type: 'pdf' | 'image' | 'text';
+  type: "pdf" | "image" | "text";
   content: string; // base64 for files, raw for text
   mimeType?: string;
   timezone: string;
@@ -109,7 +109,7 @@ export type ParseInput = {
 // Calendar Types
 // ============================================
 
-export type CalendarProvider = 'google' | 'outlook';
+export type CalendarProvider = "google" | "outlook";
 
 export type CalendarEvent = {
   title: string;
