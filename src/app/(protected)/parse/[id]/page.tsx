@@ -289,7 +289,7 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="w-full p-4 md:p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link
@@ -867,7 +867,7 @@ export default function ReviewPage() {
 
       {/* Push Bar */}
       {events.length > 0 && selectedCount > 0 && !pushResult && (
-        <div className="sticky bottom-0 md:bottom-auto bg-bg-card border border-border rounded-[16px] p-4 flex flex-col md:flex-row items-center gap-4">
+        <div className="sticky bottom-[60px] md:bottom-auto bg-bg-card border border-border shadow-2xl md:shadow-none rounded-[16px] p-4 flex flex-col sm:flex-row items-center gap-4 z-40 mt-4 md:mt-0">
           <div className="flex-1 w-full">
             <div className="w-full">
               <div className="flex flex-wrap gap-2">
@@ -948,7 +948,9 @@ export default function ReviewPage() {
               selectedCount === 0 ||
               pushing ||
               (selectedProvider !== "ics" &&
-                !connectedProviders.includes(selectedProvider))
+                !connectedProviders.includes(
+                  selectedProvider as "google" | "outlook",
+                ))
             }
             className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cta focus-visible:ring-offset-2 inline-flex items-center justify-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-8 py-2.5 rounded-[10px] cursor-pointer disabled:opacity-50 w-full md:w-auto flex-shrink-0 transition-colors"
           >
@@ -975,8 +977,8 @@ export default function ReviewPage() {
 
       {/* Success state */}
       {pushResult && (
-        <div className="sticky bottom-0 md:bottom-auto bg-success/10 border border-success/30 rounded-[16px] p-5 flex items-center justify-between text-success">
-          <div className="flex items-center gap-3">
+        <div className="sticky bottom-[60px] md:bottom-auto bg-success/10 border border-success/30 rounded-[16px] p-5 flex flex-col sm:flex-row items-center justify-between text-success shadow-2xl md:shadow-none z-40 mt-4 md:mt-0 gap-4 sm:gap-0">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <CheckCircle2 className="w-6 h-6" />
             <div>
               <p className="font-semibold">

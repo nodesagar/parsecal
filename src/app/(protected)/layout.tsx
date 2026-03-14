@@ -78,7 +78,7 @@ export default function ProtectedLayout({
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-screen pb-20 md:pb-0">{children}</main>
+      <main className="flex-1 min-w-0 min-h-screen pb-20 md:pb-0">{children}</main>
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bg-card border-t border-border flex items-center justify-around py-2 z-50">

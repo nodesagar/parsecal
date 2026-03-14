@@ -34,7 +34,7 @@ export default async function DashboardPage() {
   const hasConnectedCalendar = (connectedCalendars?.length || 0) > 0;
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="w-full p-4 md:p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-text mb-1">
