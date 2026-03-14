@@ -38,6 +38,9 @@ export type Profile = {
   custom_ai_api_key: string | null;
   monthly_parse_count: number;
   monthly_parse_reset_at: string;
+  time_format: "12h" | "24h";
+  default_event_duration: number;
+  default_reminder: number;
   created_at: string;
   updated_at: string;
 };

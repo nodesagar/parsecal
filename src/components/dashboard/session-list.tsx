@@ -203,9 +203,9 @@ export default function SessionList({
   return (
     <div className="space-y-4">
       {/* Toolbar: filters + search on one row */}
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
         {/* Filter pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto flex-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto flex-1 min-w-0 pb-1 sm:pb-0 scrollbar-hide">
           <Filter className="w-3.5 h-3.5 text-text-light shrink-0" />
           {filterOptions.map((f) => {
             const count = statusCounts[f.key] || 0;
@@ -237,7 +237,7 @@ export default function SessionList({
         </div>
 
         {/* Search */}
-        <div className="relative w-44">
+        <div className="relative w-full sm:w-44 shrink-0">
           <Search className="w-3.5 h-3.5 text-text-light absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             value={search}
@@ -258,8 +258,8 @@ export default function SessionList({
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
-        <div className="flex items-center justify-between bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 animate-in slide-in-from-top-1">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap gap-3 items-center justify-between bg-primary/5 border border-primary/20 rounded-xl p-3 sm:px-4 sm:py-2.5 animate-in slide-in-from-top-1">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={toggleSelectAll}
               className="flex items-center gap-1.5 text-xs font-medium text-primary cursor-pointer"
@@ -439,7 +439,7 @@ export default function SessionList({
                           e.stopPropagation();
                           setConfirmId(session.id);
                         }}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-error/10 cursor-pointer transition-opacity"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center md:opacity-0 md:group-hover:opacity-100 opacity-100 hover:bg-error/10 cursor-pointer transition-opacity"
                         title="Delete session"
                       >
                         <Trash2 className="w-3.5 h-3.5 text-text-light hover:text-error" />

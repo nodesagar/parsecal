@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { getGoogleOAuthClient } from "@/lib/calendar/google";
+import {
+  parseCalendarOAuthState,
+  resolveCalendarReturnPath,
+} from "@/lib/calendar/oauth-state";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -8,11 +12,13 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get("code");
-    const state = searchParams.get("state"); // In our case, state = user.id
+    const state = searchParams.get("state");
     const error = searchParams.get("error");
+    const parsedState = parseCalendarOAuthState(state);
+    const nextPath = resolveCalendarReturnPath(parsedState?.nextPath);
 
     // Target URL for redirection after processing
-    const nextUrl = new URL("/settings", request.url);
+    const nextUrl = new URL(nextPath, request.url);
 
     if (error) {
       console.error("Google Auth Error:", error);
@@ -20,7 +26,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(nextUrl);
     }
 
-    if (!code || !state) {
+    if (!code || !parsedState) {
       nextUrl.searchParams.set("error", "Missing auth parameters");
       return NextResponse.redirect(nextUrl);
     }
@@ -39,7 +45,7 @@ export async function GET(request: Request) {
     }
 
     // Optional: Ensure the state matches the logged-in user to prevent CSRF spoofing
-    if (user.id !== state) {
+    if (user.id !== parsedState.userId) {
       nextUrl.searchParams.set("error", "User mismatch during authentication");
       return NextResponse.redirect(nextUrl);
     }

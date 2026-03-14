@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import type { ParseSession, ParsedEvent } from "@/types";
+import type { ConnectedCalendar, ParseSession, ParsedEvent } from "@/types";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -20,7 +20,6 @@ import {
   Check,
   Loader2,
   Calendar,
-  ChevronDown,
   Pencil,
   X,
 } from "lucide-react";
@@ -45,8 +44,15 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
   );
 }
 
+type ConnectedCalendarPreview = Pick<
+  ConnectedCalendar,
+  "provider" | "calendar_id" | "calendar_name"
+>;
+
 export default function ReviewPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const sessionId = params.id as string;
   const supabase = createClient();
 
   const [session, setSession] = useState<ParseSession | null>(null);
@@ -59,7 +65,10 @@ export default function ReviewPage() {
   } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<ParsedEvent>>({});
-  const [connectedProviders, setConnectedProviders] = useState<string[]>([]);
+  const [connectedCalendars, setConnectedCalendars] = useState<
+    ConnectedCalendarPreview[]
+  >([]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [selectedProvider, setSelectedProvider] = useState<string>("ics");
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
@@ -67,8 +76,6 @@ export default function ReviewPage() {
 
   // We only want to load initially
   const loadData = useCallback(async () => {
-    const sessionId = params.id as string;
-
     const { data: sessionData } = await supabase
       .from("parse_sessions")
       .select("*")
@@ -85,15 +92,17 @@ export default function ReviewPage() {
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
+      setUserEmail(user.email || null);
+
       const { data: calData } = await supabase
         .from("connected_calendars")
-        .select("provider")
+        .select("provider, calendar_id, calendar_name")
         .eq("user_id", user.id)
         .eq("is_active", true);
 
       if (calData && calData.length > 0) {
+        setConnectedCalendars(calData as ConnectedCalendarPreview[]);
         const providers = calData.map((c) => c.provider);
-        setConnectedProviders(providers);
         if (providers.includes("google")) {
           setSelectedProvider("google");
         } else if (providers.includes("outlook")) {
@@ -102,6 +111,7 @@ export default function ReviewPage() {
           setSelectedProvider("ics");
         }
       } else {
+        setConnectedCalendars([]);
         setSelectedProvider("ics");
       }
     }
@@ -109,7 +119,7 @@ export default function ReviewPage() {
     setSession(sessionData);
     setEvents(eventsData || []);
     setLoading(false);
-  }, [params.id, supabase]);
+  }, [sessionId, supabase]);
 
   useEffect(() => {
     loadData();
@@ -189,7 +199,7 @@ export default function ReviewPage() {
   }
 
   async function handleExportICS() {
-    window.open(`/api/calendar/export/${params.id}`, "_blank");
+    window.open(`/api/calendar/export/${sessionId}`, "_blank");
   }
 
   async function handlePush() {
@@ -205,7 +215,7 @@ export default function ReviewPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionId: params.id,
+          sessionId,
           provider: selectedProvider,
         }),
       });
@@ -233,6 +243,24 @@ export default function ReviewPage() {
     (e) => e.is_selected && !e.pushed_at,
   ).length;
   const alreadyPushedCount = events.filter((e) => e.pushed_at).length;
+  const connectedProviders = connectedCalendars.map((calendar) => calendar.provider);
+  const googleConnected = connectedProviders.includes("google");
+  const outlookConnected = connectedProviders.includes("outlook");
+  const selectedCalendar = connectedCalendars.find(
+    (calendar) => calendar.provider === selectedProvider,
+  );
+  const selectedCalendarEmail =
+    selectedCalendar &&
+    [
+      selectedCalendar.calendar_name,
+      selectedCalendar.calendar_id,
+      userEmail,
+    ].find((value): value is string => Boolean(value && value.includes("@")));
+  const oauthError = searchParams.get("error");
+  const oauthSuccess = searchParams.get("success");
+  const connectNextPath = encodeURIComponent(`/parse/${sessionId}`);
+  const googleConnectHref = `/api/auth/calendar/google/init?next=${connectNextPath}`;
+  const outlookConnectHref = `/api/auth/calendar/outlook/init?next=${connectNextPath}`;
 
   if (loading) {
     return (
@@ -261,7 +289,7 @@ export default function ReviewPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto">
+    <div className="w-full p-4 md:p-8 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Link
@@ -345,6 +373,18 @@ export default function ReviewPage() {
           </p>
         </div>
       </div>
+
+      {oauthSuccess && (
+        <div className="bg-success/10 border border-success/30 rounded-[12px] px-4 py-3 mb-4 text-sm text-success">
+          {oauthSuccess}
+        </div>
+      )}
+
+      {oauthError && (
+        <div className="bg-error/10 border border-error/30 rounded-[12px] px-4 py-3 mb-4 text-sm text-error">
+          {oauthError}
+        </div>
+      )}
 
       {/* Bulk Actions */}
       <div className="flex items-center gap-3 mb-4">
@@ -800,36 +840,106 @@ export default function ReviewPage() {
         </div>
       )}
 
+      {events.length > 0 && connectedProviders.length === 0 && !pushResult && (
+        <div className="bg-primary/5 border border-primary/20 rounded-[16px] p-4 mb-4">
+          <p className="text-sm font-semibold text-text mb-1">
+            Connect a calendar to push directly
+          </p>
+          <p className="text-xs text-text-muted mb-3">
+            Without this step, you can only download an .ics file.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Link
+              href={googleConnectHref}
+              className="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-medium px-4 py-2 rounded-[10px] text-sm cursor-pointer"
+            >
+              Connect Google Calendar
+            </Link>
+            <Link
+              href={outlookConnectHref}
+              className="inline-flex items-center justify-center gap-2 bg-bg border border-border hover:border-primary text-text font-medium px-4 py-2 rounded-[10px] text-sm cursor-pointer"
+            >
+              Connect Outlook Calendar
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Push Bar */}
       {events.length > 0 && selectedCount > 0 && !pushResult && (
-        <div className="sticky bottom-0 md:bottom-auto bg-bg-card border border-border rounded-[16px] p-4 flex flex-col md:flex-row items-center gap-4">
-          <div className="flex-1 flex flex-col md:flex-row items-center gap-3 w-full">
-            <div className="relative w-full md:w-auto">
-              <select
-                value={selectedProvider}
-                onChange={(e) => setSelectedProvider(e.target.value)}
-                className="w-full md:w-auto appearance-none bg-bg border border-border rounded-[10px] pl-10 pr-10 py-2.5 text-sm font-medium text-text focus:border-primary focus:outline-none cursor-pointer"
-              >
-                {connectedProviders.includes("google") && (
-                  <option value="google">Google Calendar</option>
+        <div className="sticky bottom-[60px] md:bottom-auto bg-bg-card border border-border shadow-2xl md:shadow-none rounded-[16px] p-4 flex flex-col sm:flex-row items-center gap-4 z-40 mt-4 md:mt-0">
+          <div className="flex-1 w-full">
+            <div className="w-full">
+              <div className="flex flex-wrap gap-2">
+                {googleConnected ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProvider("google")}
+                    className={`focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 inline-flex items-center gap-2 rounded-[10px] px-3 py-1.5 text-sm font-medium border cursor-pointer transition-colors ${
+                      selectedProvider === "google"
+                        ? "bg-primary text-white border-primary"
+                        : "bg-bg text-text border-border hover:border-primary/60"
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Google Calendar
+                  </button>
+                ) : (
+                  <Link
+                    href={googleConnectHref}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 inline-flex items-center gap-2 rounded-[10px] px-3 py-1.5 text-sm font-medium border border-dashed border-border bg-bg text-text-muted hover:text-text hover:border-primary hover:border-solid transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Google Calendar
+                  </Link>
                 )}
-                {connectedProviders.includes("outlook") && (
-                  <option value="outlook">Outlook Calendar</option>
+                {outlookConnected ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProvider("outlook")}
+                    className={`focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 inline-flex items-center gap-2 rounded-[10px] px-3 py-1.5 text-sm font-medium border cursor-pointer transition-colors ${
+                      selectedProvider === "outlook"
+                        ? "bg-primary text-white border-primary"
+                        : "bg-bg text-text border-border hover:border-primary/60"
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Outlook Calendar
+                  </button>
+                ) : (
+                  <Link
+                    href={outlookConnectHref}
+                    className="focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 inline-flex items-center gap-2 rounded-[10px] px-3 py-1.5 text-sm font-medium border border-dashed border-border bg-bg text-text-muted hover:text-text hover:border-primary hover:border-solid transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Outlook Calendar
+                  </Link>
                 )}
-                <option value="ics">.ics Download</option>
-              </select>
-              <Calendar className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <ChevronDown className="w-4 h-4 text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProvider("ics")}
+                  className={`focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 inline-flex items-center gap-2 rounded-[10px] px-3 py-1.5 text-sm font-medium border cursor-pointer transition-colors ${
+                    selectedProvider === "ics"
+                      ? "bg-primary text-white border-primary"
+                      : "bg-bg text-text border-border hover:border-primary/60"
+                  }`}
+                >
+                  <Download className="w-4 h-4" />
+                  .ics Download
+                </button>
+              </div>
 
-            {connectedProviders.length === 0 && selectedProvider !== "ics" && (
-              <span className="text-xs text-warning bg-warning/10 px-2 py-1 rounded-[6px]">
-                Calendar not connected.{" "}
-                <Link href="/settings" className="underline font-medium">
-                  Connect in Settings
-                </Link>
-              </span>
-            )}
+              {selectedProvider !== "ics" && selectedCalendarEmail ? (
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className="text-text-muted animate-in fade-in">
+                    Sending to{" "}
+                    <span className="font-medium text-text">
+                      {selectedCalendarEmail}
+                    </span>
+                  </span>
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <button
@@ -838,9 +948,11 @@ export default function ReviewPage() {
               selectedCount === 0 ||
               pushing ||
               (selectedProvider !== "ics" &&
-                !connectedProviders.includes(selectedProvider))
+                !connectedProviders.includes(
+                  selectedProvider as "google" | "outlook",
+                ))
             }
-            className="flex items-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-8 py-2.5 rounded-[10px] cursor-pointer disabled:opacity-50 w-full md:w-auto justify-center flex-shrink-0"
+            className="focus:outline-none focus-visible:ring-2 focus-visible:ring-cta focus-visible:ring-offset-2 inline-flex items-center justify-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-8 py-2.5 rounded-[10px] cursor-pointer disabled:opacity-50 w-full md:w-auto flex-shrink-0 transition-colors"
           >
             {pushing ? (
               <>
@@ -865,8 +977,8 @@ export default function ReviewPage() {
 
       {/* Success state */}
       {pushResult && (
-        <div className="sticky bottom-0 md:bottom-auto bg-success/10 border border-success/30 rounded-[16px] p-5 flex items-center justify-between text-success">
-          <div className="flex items-center gap-3">
+        <div className="sticky bottom-[60px] md:bottom-auto bg-success/10 border border-success/30 rounded-[16px] p-5 flex flex-col sm:flex-row items-center justify-between text-success shadow-2xl md:shadow-none z-40 mt-4 md:mt-0 gap-4 sm:gap-0">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <CheckCircle2 className="w-6 h-6" />
             <div>
               <p className="font-semibold">

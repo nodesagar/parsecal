@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { getGoogleAuthUrl } from "@/lib/calendar/google";
+import { createCalendarOAuthState } from "@/lib/calendar/oauth-state";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
     const supabase = await createClient();
     const {
       data: { user },
@@ -15,8 +17,9 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Generate the Google OAuth URL targeting this user ID
-    const url = getGoogleAuthUrl(user.id);
+    // Generate an OAuth state payload with user identity + optional return path.
+    const state = createCalendarOAuthState(user.id, searchParams.get("next"));
+    const url = getGoogleAuthUrl(state);
 
     // Redirect the user to Google
     return NextResponse.redirect(url);
