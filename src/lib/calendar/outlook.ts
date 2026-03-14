@@ -102,6 +102,11 @@ type OutlookCalendarResponse = {
   name?: string;
 };
 
+type OutlookMeResponse = {
+  mail?: string;
+  userPrincipalName?: string;
+};
+
 type OutlookEventResponse = {
   id?: string;
 };
@@ -138,7 +143,7 @@ function getMicrosoftScopeString() {
   return MICROSOFT_SCOPES.join(" ");
 }
 
-export function getOutlookAuthUrl(userId: string) {
+export function getOutlookAuthUrl(state: string) {
   const { clientId, redirectUri } = getMicrosoftOAuthConfig();
   const params = new URLSearchParams({
     client_id: clientId,
@@ -146,7 +151,7 @@ export function getOutlookAuthUrl(userId: string) {
     redirect_uri: redirectUri,
     response_mode: "query",
     scope: getMicrosoftScopeString(),
-    state: userId,
+    state,
     prompt: "consent",
   });
 
@@ -247,6 +252,15 @@ export async function getOutlookPrimaryCalendar(accessToken: string) {
     calendarId: calendar.id || "primary",
     calendarName: calendar.name || "Outlook Calendar",
   };
+}
+
+export async function getOutlookAccountIdentifier(accessToken: string) {
+  const profile = await callMicrosoftGraph<OutlookMeResponse>(
+    "/me",
+    accessToken,
+  );
+
+  return profile.mail || profile.userPrincipalName || null;
 }
 
 function formatDateOnly(date: Date) {

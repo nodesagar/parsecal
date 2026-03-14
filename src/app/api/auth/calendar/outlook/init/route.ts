@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { getOutlookAuthUrl } from "@/lib/calendar/outlook";
+import { createCalendarOAuthState } from "@/lib/calendar/oauth-state";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
     const supabase = await createClient();
     const {
       data: { user },
@@ -15,7 +17,8 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const url = getOutlookAuthUrl(user.id);
+    const state = createCalendarOAuthState(user.id, searchParams.get("next"));
+    const url = getOutlookAuthUrl(state);
     return NextResponse.redirect(url);
   } catch (error) {
     console.error("Outlook Auth Init Error:", error);

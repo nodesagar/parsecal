@@ -1,8 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   exchangeOutlookCodeForTokens,
+  getOutlookAccountIdentifier,
   getOutlookPrimaryCalendar,
 } from "@/lib/calendar/outlook";
+import {
+  parseCalendarOAuthState,
+  resolveCalendarReturnPath,
+} from "@/lib/calendar/oauth-state";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -13,8 +18,10 @@ export async function GET(request: Request) {
     const code = searchParams.get("code");
     const state = searchParams.get("state");
     const error = searchParams.get("error");
+    const parsedState = parseCalendarOAuthState(state);
+    const nextPath = resolveCalendarReturnPath(parsedState?.nextPath);
 
-    const nextUrl = new URL("/settings", request.url);
+    const nextUrl = new URL(nextPath, request.url);
 
     if (error) {
       console.error("Outlook Auth Error:", error);
@@ -22,7 +29,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(nextUrl);
     }
 
-    if (!code || !state) {
+    if (!code || !parsedState) {
       nextUrl.searchParams.set("error", "Missing auth parameters");
       return NextResponse.redirect(nextUrl);
     }
@@ -40,7 +47,7 @@ export async function GET(request: Request) {
       return NextResponse.redirect(nextUrl);
     }
 
-    if (user.id !== state) {
+    if (user.id !== parsedState.userId) {
       nextUrl.searchParams.set("error", "User mismatch during authentication");
       return NextResponse.redirect(nextUrl);
     }
@@ -50,6 +57,7 @@ export async function GET(request: Request) {
 
     let calendarId = "primary";
     let calendarName = "Outlook Calendar";
+    let accountIdentifier = user.email || null;
 
     try {
       const calendar = await getOutlookPrimaryCalendar(tokens.access_token);
@@ -59,6 +67,20 @@ export async function GET(request: Request) {
       console.warn(
         "Could not fetch Outlook primary calendar info, defaulting to primary:",
         calendarError,
+      );
+    }
+
+    try {
+      const resolvedIdentifier = await getOutlookAccountIdentifier(
+        tokens.access_token,
+      );
+      if (resolvedIdentifier) {
+        accountIdentifier = resolvedIdentifier;
+      }
+    } catch (profileError) {
+      console.warn(
+        "Could not fetch Outlook account identity, using fallback label:",
+        profileError,
       );
     }
 
@@ -92,7 +114,7 @@ export async function GET(request: Request) {
           refresh_token: refreshToken,
           token_expires_at: expiresAt.toISOString(),
           calendar_id: calendarId,
-          calendar_name: calendarName,
+          calendar_name: accountIdentifier || calendarName,
           is_active: true,
         },
         {

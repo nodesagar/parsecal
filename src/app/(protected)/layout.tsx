@@ -14,6 +14,7 @@ import {
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/parse/new", label: "New Parse", icon: Plus },
+  { href: "/calendars", label: "Calendars", icon: Calendar },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -38,7 +39,7 @@ export default function ProtectedLayout({
       <aside className="hidden md:flex flex-col w-64 bg-bg-sidebar border-r border-border p-4 sticky top-0 h-screen">
         {/* Logo */}
         <Link
-          href="/dashboard"
+          href="/"
           className="flex items-center gap-2 px-3 py-2 mb-8 cursor-pointer"
         >
           <Calendar className="w-6 h-6 text-primary" />

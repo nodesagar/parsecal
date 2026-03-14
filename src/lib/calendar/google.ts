@@ -28,7 +28,7 @@ export function getGoogleOAuthClient() {
 /**
  * Generate the authorization URL for user consent
  */
-export function getGoogleAuthUrl(userId: string) {
+export function getGoogleAuthUrl(state: string) {
   const oauth2Client = getGoogleOAuthClient();
 
   // Define the scopes we need
@@ -41,7 +41,7 @@ export function getGoogleAuthUrl(userId: string) {
     access_type: "offline", // Get a refresh token
     prompt: "consent", // Force consent so we always get a refresh token
     scope: scopes,
-    state: userId, // Pass the user ID as state to link it back after redirect
+    state, // Encodes user identity and optional return path
   });
 }
 

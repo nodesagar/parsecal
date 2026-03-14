@@ -15,10 +15,10 @@ export default function LandingPage() {
     <div className="min-h-screen bg-bg">
       {/* Navigation */}
       <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[16px] px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <Calendar className="w-6 h-6 text-primary" />
           <span className="text-lg font-bold text-text">CalendarAI</span>
-        </div>
+        </Link>
         <div className="flex items-center gap-3">
           <Link
             href="/login"

@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Upload, Plus, Clock } from "lucide-react";
+import { Upload, Plus, Clock, Calendar } from "lucide-react";
 import SessionList from "@/components/dashboard/session-list";
 
 export default async function DashboardPage() {
@@ -22,9 +22,16 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false })
     .limit(20);
 
+  const { data: connectedCalendars } = await supabase
+    .from("connected_calendars")
+    .select("provider")
+    .eq("user_id", user?.id)
+    .eq("is_active", true);
+
   const parseLimit = parseInt(process.env.MONTHLY_PARSE_LIMIT || "20");
   const parsesUsed = profile?.monthly_parse_count ?? 0;
   const parsesRemaining = Math.max(0, parseLimit - parsesUsed);
+  const hasConnectedCalendar = (connectedCalendars?.length || 0) > 0;
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto">
@@ -39,6 +46,39 @@ export default async function DashboardPage() {
       </div>
 
       {/* Upload Zone */}
+      {!hasConnectedCalendar && (
+        <div className="bg-primary/5 border border-primary/20 rounded-[16px] p-5 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-[10px] bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-sm font-semibold text-text mb-1">
+                Recommended first step: connect your calendar
+              </h2>
+              <p className="text-xs text-text-muted mb-3">
+                This lets users push events directly instead of only downloading
+                .ics files.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Link
+                  href="/api/auth/calendar/google/init?next=/dashboard"
+                  className="inline-flex items-center justify-center bg-primary hover:bg-primary-hover text-white font-medium text-sm px-4 py-2 rounded-[10px] cursor-pointer"
+                >
+                  Connect Google
+                </Link>
+                <Link
+                  href="/api/auth/calendar/outlook/init?next=/dashboard"
+                  className="inline-flex items-center justify-center bg-bg border border-border hover:border-primary text-text font-medium text-sm px-4 py-2 rounded-[10px] cursor-pointer"
+                >
+                  Connect Outlook
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Link
         href="/parse/new"
         className="block bg-bg-card border-2 border-dashed border-border hover:border-primary rounded-[16px] p-10 text-center mb-8 group cursor-pointer"
