@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Profile } from "@/types";
+import type { Profile, AIProviderName } from "@/types";
 import {
   User,
   Globe,
@@ -11,9 +11,12 @@ import {
   Loader2,
   CheckCircle2,
   Save,
-  Sliders
+  Sliders,
+  XCircle
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+
+type KeyValidationState = "idle" | "checking" | "valid" | "invalid";
 
 type Tab = "profile" | "preferences" | "ai";
 
@@ -47,6 +50,12 @@ function SettingsContent() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // API key validation
+  const [keyValidation, setKeyValidation] = useState<KeyValidationState>("idle");
+  const [keyValidationMsg, setKeyValidationMsg] = useState<string | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastValidatedKey = useRef<string>("");
+
   const loadData = useCallback(async () => {
     const {
       data: { user },
@@ -70,6 +79,75 @@ function SettingsContent() {
     }
     setLoading(false);
   }, [supabase]);
+
+  const validateApiKey = useCallback(
+    async (apiKey: string, provider: AIProviderName) => {
+      const trimmed = apiKey.trim();
+
+      // Reset if empty
+      if (!trimmed) {
+        setKeyValidation("idle");
+        setKeyValidationMsg(null);
+        lastValidatedKey.current = "";
+        return;
+      }
+
+      // Skip if already validated this exact key
+      if (trimmed === lastValidatedKey.current) return;
+
+      setKeyValidation("checking");
+      setKeyValidationMsg(null);
+
+      try {
+        const res = await fetch("/api/validate-key", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider, apiKey: trimmed }),
+        });
+        const data = await res.json() as { valid: boolean; error?: string };
+        lastValidatedKey.current = trimmed;
+        if (data.valid) {
+          setKeyValidation("valid");
+          setKeyValidationMsg(null);
+        } else {
+          setKeyValidation("invalid");
+          setKeyValidationMsg(data.error || "Invalid API key");
+        }
+      } catch {
+        setKeyValidation("invalid");
+        setKeyValidationMsg("Could not reach validation server");
+      }
+    },
+    []
+  );
+
+  // Debounced trigger whenever the API key input changes
+  const handleApiKeyChange = useCallback(
+    (newKey: string, provider: AIProviderName) => {
+      // Clear any pending debounce
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+      // Reset validation immediately when user is typing
+      if (newKey.trim() !== lastValidatedKey.current) {
+        setKeyValidation(newKey.trim() ? "idle" : "idle");
+        setKeyValidationMsg(null);
+      }
+
+      debounceTimer.current = setTimeout(() => {
+        validateApiKey(newKey, provider);
+      }, 700);
+    },
+    [validateApiKey]
+  );
+
+  // Reset validation when provider changes
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleProviderChange = useCallback((newProvider: AIProviderName) => {
+    setKeyValidation("idle");
+    setKeyValidationMsg(null);
+    lastValidatedKey.current = "";
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+  }, []);
 
   useEffect(() => {
     // Check for oauth redirect messages
@@ -297,13 +375,11 @@ function SettingsContent() {
                 </label>
                 <select
                   value={profile.preferred_ai_provider}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      preferred_ai_provider: e.target
-                        .value as Profile["preferred_ai_provider"],
-                    })
-                  }
+                  onChange={(e) => {
+                    const newProvider = e.target.value as Profile["preferred_ai_provider"];
+                    handleProviderChange(newProvider);
+                    setProfile({ ...profile, preferred_ai_provider: newProvider });
+                  }}
                   className="w-full max-w-md bg-bg border border-border rounded-[10px] px-4 py-2.5 text-sm text-text focus:border-border-focus focus:outline-none cursor-pointer transition-colors"
                 >
                   <option value="gemini">Google Gemini (Free)</option>
@@ -313,6 +389,9 @@ function SettingsContent() {
                   <option value="claude">
                     Anthropic Claude (Requires your API key)
                   </option>
+                  <option value="minimax">
+                    Minimax (Requires your API key)
+                  </option>
                 </select>
               </div>
               <div>
@@ -320,27 +399,69 @@ function SettingsContent() {
                   <Key className="w-4 h-4 mr-1.5" />
                   Your API Key (Optional)
                 </label>
-                <input
-                  type="password"
-                  value={profile.custom_ai_api_key || ""}
-                  onChange={(e) =>
-                    setProfile({
-                      ...profile,
-                      custom_ai_api_key: e.target.value || null,
-                    })
-                  }
-                  placeholder="Enter your API key for unlimited parses"
-                  className="w-full max-w-md bg-bg border border-border rounded-[10px] px-4 py-2.5 text-sm text-text placeholder:text-text-light focus:border-border-focus focus:outline-none transition-colors"
-                />
-                <p className="text-xs text-text-muted mt-2">
-                  Add your own key for unlimited parsing. Without it, you get{" "}
-                  {process.env.NEXT_PUBLIC_MONTHLY_PARSE_LIMIT || 20} free
-                  parses/month using Gemini.
-                </p>
+                <div className="relative w-full max-w-md">
+                  <input
+                    type="password"
+                    value={profile.custom_ai_api_key || ""}
+                    onChange={(e) => {
+                      const newKey = e.target.value || null;
+                      setProfile({ ...profile, custom_ai_api_key: newKey });
+                      handleApiKeyChange(newKey || "", profile.preferred_ai_provider);
+                    }}
+                    placeholder="Enter your API key for unlimited parses"
+                    className={`w-full bg-bg border rounded-[10px] px-4 py-2.5 pr-10 text-sm text-text placeholder:text-text-light focus:outline-none transition-colors ${
+                      keyValidation === "valid"
+                        ? "border-success focus:border-success"
+                        : keyValidation === "invalid"
+                        ? "border-error focus:border-error"
+                        : "border-border focus:border-border-focus"
+                    }`}
+                  />
+                  {/* Inline validation icon */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    {keyValidation === "checking" && (
+                      <Loader2 className="w-4 h-4 animate-spin text-text-muted" />
+                    )}
+                    {keyValidation === "valid" && (
+                      <CheckCircle2 className="w-4 h-4 text-success" />
+                    )}
+                    {keyValidation === "invalid" && (
+                      <XCircle className="w-4 h-4 text-error" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Validation status message */}
+                {keyValidation === "valid" && (
+                  <p className="text-xs text-success mt-2 font-medium flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    API key is valid and ready to use!
+                  </p>
+                )}
+                {keyValidation === "invalid" && keyValidationMsg && (
+                  <p className="text-xs text-error mt-2 font-medium flex items-center gap-1">
+                    <XCircle className="w-3.5 h-3.5" />
+                    {keyValidationMsg}
+                  </p>
+                )}
+                {keyValidation === "checking" && (
+                  <p className="text-xs text-text-muted mt-2 flex items-center gap-1">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Validating key with {profile.preferred_ai_provider}…
+                  </p>
+                )}
+                {keyValidation === "idle" && (
+                  <p className="text-xs text-text-muted mt-2">
+                    Add your own key for unlimited parsing. Without it, you get{" "}
+                    {process.env.NEXT_PUBLIC_MONTHLY_PARSE_LIMIT || 20} free
+                    parses/month using Gemini.
+                  </p>
+                )}
+
                 {profile.preferred_ai_provider !== "gemini" &&
                   !profile.custom_ai_api_key && (
                     <p className="text-xs text-warning mt-2 font-medium">
-                      ⚠ OpenAI and Claude require your own API key. Without one,
+                      ⚠ OpenAI, Claude, and Minimax require your own API key. Without one,
                       Gemini will be used instead.
                     </p>
                   )}

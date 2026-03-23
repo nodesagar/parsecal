@@ -34,7 +34,7 @@ export type Profile = {
   avatar_url: string | null;
   default_timezone: string;
   preferred_calendar_provider: "google" | "outlook" | "manual";
-  preferred_ai_provider: "gemini" | "openai" | "claude";
+  preferred_ai_provider: "gemini" | "openai" | "claude" | "minimax";
   custom_ai_api_key: string | null;
   monthly_parse_count: number;
   monthly_parse_reset_at: string;
@@ -66,7 +66,7 @@ export type ParseSession = {
   input_type: "pdf" | "image" | "text";
   input_file_path: string | null;
   raw_text_input: string | null;
-  ai_provider_used: "gemini" | "openai" | "claude";
+  ai_provider_used: "gemini" | "openai" | "claude" | "minimax";
   status: "processing" | "draft" | "pushed" | "partially_pushed" | "failed";
   event_count: number;
   error_message: string | null;
@@ -99,7 +99,7 @@ export type ParsedEvent = {
 // AI Provider Types
 // ============================================
 
-export type AIProviderName = "gemini" | "openai" | "claude";
+export type AIProviderName = "gemini" | "openai" | "claude" | "minimax";
 
 export type ParseInput = {
   type: "pdf" | "image" | "text";
