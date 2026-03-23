@@ -3,11 +3,13 @@ import { BaseAIProvider } from "./base-provider";
 import { GeminiProvider } from "./gemini";
 import { OpenAIProvider } from "./openai";
 import { ClaudeProvider } from "./claude";
+import { MinimaxProvider } from "./minimax";
 
 const DEFAULT_KEYS: Record<AIProviderName, string | undefined> = {
   gemini: process.env.GEMINI_API_KEY,
   openai: process.env.OPENAI_API_KEY,
   claude: process.env.ANTHROPIC_API_KEY,
+  minimax: process.env.MINIMAX_API_KEY,
 };
 
 // Only Gemini has a free tier — never auto-fallback to paid providers
@@ -29,6 +31,8 @@ export function getProvider(
       return new OpenAIProvider(apiKey);
     case "claude":
       return new ClaudeProvider(apiKey);
+    case "minimax":
+      return new MinimaxProvider(apiKey);
     default:
       throw new Error(`Unknown AI provider: ${name}`);
   }

@@ -2,15 +2,19 @@ import OpenAI from "openai";
 import { BaseAIProvider } from "./base-provider";
 import type { ParseInput } from "@/types";
 
-export class OpenAIProvider extends BaseAIProvider {
+export class MinimaxProvider extends BaseAIProvider {
   async callModel(prompt: string, input: ParseInput): Promise<string> {
-    const client = new OpenAI({ apiKey: this.apiKey });
+    const client = new OpenAI({
+      apiKey: this.apiKey,
+      baseURL: "https://api.minimaxi.com/v1", // Minimax international compatible endpoint
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const content: any[] = [];
 
     if (input.type === "pdf" && input.content) {
-      // Upload the PDF then reference it as a file_id in the message
+      // Minimax's OpenAI compatibility might not perfectly support files.create for chat completions.
+      // Trying the same approach as OpenAI. If it fails, users will need to use text.
       const pdfBuffer = Buffer.from(input.content, "base64");
       const uploadedFile = await client.files.create({
         file: new File([pdfBuffer], "document.pdf", { type: "application/pdf" }),
@@ -42,9 +46,10 @@ export class OpenAIProvider extends BaseAIProvider {
     ];
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "MiniMax-Text-01", // Or MiniMax-Text-01, minmax-m2.5-chat, etc. We can try minmax-m2.5 
       messages,
-      response_format: { type: "json_object" },
+      // MiniMax supports json_object for M2.5 and newer models as per docs
+      response_format: { type: "json_object" }, 
     });
 
     return response.choices[0]?.message?.content || "";
