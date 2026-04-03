@@ -14,17 +14,16 @@ function getGoogleClientId(): string | null {
 }
 
 export async function GET(request: Request) {
-    const clientId = getGoogleClientId();
-    const baseUrl = resolveAppBaseUrl(request);
-    if (!clientId) {
-        return NextResponse.redirect(
-            `${baseUrl}/login?error=${encodeURIComponent('Missing Google OAuth client ID')}`
-        );
-    }
-
     const url = new URL(request.url);
     const requestedNext = url.searchParams.get('next');
     const next = requestedNext && requestedNext.startsWith('/') ? requestedNext : '/dashboard';
+    const baseUrl = resolveAppBaseUrl(request);
+    const clientId = getGoogleClientId();
+    if (!clientId) {
+        return NextResponse.redirect(
+            `${baseUrl}/api/auth/oauth/google?next=${encodeURIComponent(next)}`
+        );
+    }
 
     const state = crypto.randomUUID();
     const nonce = crypto.randomUUID();
