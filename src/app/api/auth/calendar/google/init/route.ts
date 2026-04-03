@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getGoogleAuthUrl } from '@/lib/calendar/google';
+import { GOOGLE_CALENDAR_INTEGRATION_ENABLED } from '@/lib/features';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,11 @@ function sanitizeNextPath(value: string | null): string {
 export async function GET(request: Request) {
     const urlObj = new URL(request.url);
     const next = sanitizeNextPath(urlObj.searchParams.get('next'));
+    if (!GOOGLE_CALENDAR_INTEGRATION_ENABLED) {
+        const fallback = new URL(next, request.url);
+        fallback.searchParams.set('error', 'Google Calendar integration is disabled in this environment.');
+        return NextResponse.redirect(fallback);
+    }
 
     try {
         const supabase = await createClient();

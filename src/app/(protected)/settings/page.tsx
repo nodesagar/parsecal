@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { GOOGLE_CALENDAR_INTEGRATION_ENABLED } from '@/lib/features';
 import type { Profile, ConnectedCalendar } from '@/types';
 import {
     User,
@@ -62,7 +63,12 @@ function SettingsContent() {
                 .select('*')
                 .eq('user_id', user.id)
                 .eq('is_active', true);
-            setCalendars(calData || []);
+            const activeCalendars = calData || [];
+            setCalendars(
+                GOOGLE_CALENDAR_INTEGRATION_ENABLED
+                    ? activeCalendars
+                    : activeCalendars.filter((calendar) => calendar.provider !== 'google')
+            );
         }
         setLoading(false);
     }, [supabase]);
@@ -268,36 +274,37 @@ function SettingsContent() {
 
                 {tab === 'calendars' && (
                     <div className="space-y-4">
-                        {/* Google Calendar */}
-                        <div className="flex items-center justify-between p-4 bg-bg rounded-[10px] border border-border">
-                            <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center ${googleConnected ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
-                                    <Calendar className="w-5 h-5" />
+                        {GOOGLE_CALENDAR_INTEGRATION_ENABLED && (
+                            <div className="flex items-center justify-between p-4 bg-bg rounded-[10px] border border-border">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center ${googleConnected ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
+                                        <Calendar className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-text">Google Calendar</p>
+                                        <p className="text-xs text-text-muted">
+                                            {googleConnected ? googleConnected.calendar_name : 'Not connected'}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-medium text-text">Google Calendar</p>
-                                    <p className="text-xs text-text-muted">
-                                        {googleConnected ? googleConnected.calendar_name : 'Not connected'}
-                                    </p>
-                                </div>
+                                {googleConnected ? (
+                                    <button
+                                        onClick={() => disconnectCalendar(googleConnected.id)}
+                                        className="p-2 text-text-muted hover:text-error hover:bg-error/10 rounded-[8px] cursor-pointer transition-colors"
+                                        title="Disconnect Calendar"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleConnectGoogle}
+                                        className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-[10px] cursor-pointer hover:bg-primary-dark"
+                                    >
+                                        Connect
+                                    </button>
+                                )}
                             </div>
-                            {googleConnected ? (
-                                <button
-                                    onClick={() => disconnectCalendar(googleConnected.id)}
-                                    className="p-2 text-text-muted hover:text-error hover:bg-error/10 rounded-[8px] cursor-pointer transition-colors"
-                                    title="Disconnect Calendar"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={handleConnectGoogle}
-                                    className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-[10px] cursor-pointer hover:bg-primary-dark"
-                                >
-                                    Connect
-                                </button>
-                            )}
-                        </div>
+                        )}
 
                         {/* Microsoft Outlook */}
                         <div className="flex items-center justify-between p-4 bg-bg rounded-[10px] border border-border opacity-60">

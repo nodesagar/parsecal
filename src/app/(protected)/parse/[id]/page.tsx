@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { GOOGLE_CALENDAR_INTEGRATION_ENABLED } from '@/lib/features';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import type { ParseSession, ParsedEvent } from '@/types';
@@ -86,9 +87,16 @@ export default function ReviewPage() {
                 .eq('is_active', true);
 
             if (calData && calData.length > 0) {
-                const providers = calData.map(c => c.provider);
+                const rawProviders = calData.map(c => c.provider);
+                const providers = GOOGLE_CALENDAR_INTEGRATION_ENABLED
+                    ? rawProviders
+                    : rawProviders.filter((provider) => provider !== 'google');
                 setConnectedProviders(providers);
-                if (providers.includes('google')) setSelectedProvider('google');
+                if (providers.includes('outlook')) {
+                    setSelectedProvider('outlook');
+                } else if (providers.includes('google')) {
+                    setSelectedProvider('google');
+                }
             }
         }
 
@@ -213,7 +221,7 @@ export default function ReviewPage() {
 
     const selectedCount = events.filter((e) => e.is_selected && !e.pushed_at).length;
     const alreadyPushedCount = events.filter((e) => e.pushed_at).length;
-    const googleConnected = connectedProviders.includes('google');
+    const googleConnected = GOOGLE_CALENDAR_INTEGRATION_ENABLED && connectedProviders.includes('google');
     const outlookConnected = connectedProviders.includes('outlook');
     const connectGoogleHref = `/api/auth/calendar/google/init?next=${encodeURIComponent(`/parse/${sessionId}`)}`;
 
@@ -708,7 +716,7 @@ export default function ReviewPage() {
                             </div>
                         </div>
 
-                        {!googleConnected && (
+                        {GOOGLE_CALENDAR_INTEGRATION_ENABLED && !googleConnected && (
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-primary/5 border border-primary/20 rounded-[10px] px-3 py-2.5">
                                 <span className="text-xs text-text-muted">
                                     Want one-click push? Connect Google Calendar here.

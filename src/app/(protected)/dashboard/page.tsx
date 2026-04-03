@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
+import { GOOGLE_CALENDAR_INTEGRATION_ENABLED } from '@/lib/features';
 import Link from 'next/link';
 import {
     Upload,
@@ -25,13 +26,17 @@ export default async function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(20);
 
-    const { data: googleCalendar } = await supabase
-        .from('connected_calendars')
-        .select('id, calendar_name')
-        .eq('user_id', user?.id)
-        .eq('provider', 'google')
-        .eq('is_active', true)
-        .maybeSingle();
+    let googleCalendar: { id: string; calendar_name: string } | null = null;
+    if (GOOGLE_CALENDAR_INTEGRATION_ENABLED && user?.id) {
+        const { data } = await supabase
+            .from('connected_calendars')
+            .select('id, calendar_name')
+            .eq('user_id', user.id)
+            .eq('provider', 'google')
+            .eq('is_active', true)
+            .maybeSingle();
+        googleCalendar = data;
+    }
 
     const parseLimit = parseInt(process.env.MONTHLY_PARSE_LIMIT || '20');
     const parsesUsed = profile?.monthly_parse_count ?? 0;
@@ -70,7 +75,7 @@ export default async function DashboardPage() {
             </Link>
 
             {/* Calendar Connect Shortcut */}
-            {!googleCalendar && (
+            {GOOGLE_CALENDAR_INTEGRATION_ENABLED && !googleCalendar && (
                 <div className="bg-bg-card border border-border rounded-[16px] p-5 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-primary/10 rounded-[10px] flex items-center justify-center flex-shrink-0">

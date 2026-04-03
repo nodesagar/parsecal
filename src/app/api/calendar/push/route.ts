@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { getGoogleOAuthClient, convertToGoogleEvent } from '@/lib/calendar/google';
+import { GOOGLE_CALENDAR_INTEGRATION_ENABLED } from '@/lib/features';
 import {
     createOutlookEvent,
     convertToOutlookEvent,
@@ -27,6 +28,9 @@ export async function POST(request: Request) {
 
         if (!isSupportedProvider(provider)) {
             return NextResponse.json({ error: 'Unsupported provider' }, { status: 400 });
+        }
+        if (provider === 'google' && !GOOGLE_CALENDAR_INTEGRATION_ENABLED) {
+            return NextResponse.json({ error: 'Google Calendar integration is disabled in this environment.' }, { status: 400 });
         }
 
         const supabase = await createClient();
