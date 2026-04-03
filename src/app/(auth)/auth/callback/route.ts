@@ -1,26 +1,32 @@
-import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { createClient } from '@/lib/supabase/server';
+import { resolveAppBaseUrl } from '@/lib/url/base-url';
+import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+    const { searchParams } = new URL(request.url);
+    const baseUrl = resolveAppBaseUrl(request);
+    const code = searchParams.get('code');
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+    const nextParam = searchParams.get('next');
+    const next = nextParam && nextParam.startsWith('/') ? nextParam : '/dashboard';
 
-  if (code) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      const forwardedHost = request.headers.get("x-forwarded-host");
-      const isLocalEnv = process.env.NODE_ENV === "development";
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
-      } else {
-        return NextResponse.redirect(`${origin}${next}`);
-      }
+    if (error || errorDescription) {
+        const message = errorDescription || error || 'oauth_error';
+        return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(message)}`);
     }
-  }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`);
+    if (code) {
+        const supabase = await createClient();
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (!exchangeError) {
+            return NextResponse.redirect(`${baseUrl}${next}`);
+        }
+
+        return NextResponse.redirect(
+            `${baseUrl}/login?error=${encodeURIComponent(exchangeError.message)}`
+        );
+    }
+
+    return NextResponse.redirect(`${baseUrl}/login?error=missing_auth_code`);
 }

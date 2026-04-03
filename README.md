@@ -1,142 +1,141 @@
-<div align="center">
-  <img src="assets/banner.png" alt="ParseCal Banner" width="100%">
+# 📅 ParseCal
 
-  # 📅 ParseCal
-  ### *Streamline Your Schedule with AI-Powered Calendar Intelligence*
+> *Turn PDFs, images, and text into calendar events — powered by AI.*
 
-  [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-  [![Supabase](https://img.shields.io/badge/Supabase-Auth_%26_DB-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com/)
-  [![AI Powered](https://img.shields.io/badge/AI_Powered-Gemini_|_OpenAI_|_Claude-blueviolet?style=flat-square)](https://ai.google.dev/)
+Ever received a class timetable as a PDF and wished it would just *appear* in your calendar? Yeah, me too. That's why I built ParseCal.
 
-  ---
-
-  **ParseCal** is a high-performance, AI-driven utility designed to eliminate the friction of manual calendar entry. Drop any schedule — a university timetable, conference agenda, meeting list, or just some messy text — and let AI do the heavy lifting. Review the extracted events, tweak what you need, and push them straight to **Google** or **Outlook Calendar**.
-
-  [**Explore the Repo**](https://github.com/nodesagar/parsecal) • [**Report a Bug**](https://github.com/nodesagar/parsecal/issues) • [**Request a Feature**](https://github.com/nodesagar/parsecal/issues)
-
-</div>
-
-## 🚀 The Multi-Modal AI Extraction Flow
-
-ParseCal treats your schedules with clinical precision. It doesn't just "read" text; it understands structure, detects intents, and resolves temporal ambiguities.
-
-1.  **Ingestion:** Upload a PDF, image, or paste an unstructured text dump.
-2.  **Extraction:** LLMs (Gemini, Claude, GPT-4o, Minimax) extract structured event data.
-3.  **Refinement:** Automatic timezone detection and date normalization.
-4.  **Review:** A sleek, interactive dashboard to edit and confirm details.
-5.  **Sync:** Instant push to Google Calendar or Microsoft Outlook via OAuth2.
+Drop in any schedule — a university timetable, conference agenda, meeting list, or just some messy text — and let AI do the heavy lifting. Review the extracted events, tweak what you need, and push them straight to Google Calendar. Done.
 
 ---
 
 ## ✨ Features
 
-- 📄 **Multi-format Support** — High-fidelity parsing from PDFs, images, and raw text.
-- 🤖 **AI Cascade extraction** — Gemini (primary), OpenAI, Claude, and Minimax with automatic fallback for maximum reliability.
-- ✏️ **Event Review & Editing** — Granular control over titles, times, locations, and recurrence rules.
-- 📆 **Ecosystem Integration** — OAuth-based push to Google and Outlook Calendar.
-- 📥 **ICS Export** — Download standard `.ics` files for use with any other calendar app.
-- 🔍 **Audit Trail** — Search, filter, and manage all your historical parsing sessions.
-- 🚦 **Safety & Resilience** — Rate limiting and email authentication powered by Supabase.
-
----
+- 📄 **Multi-format input** — Upload PDFs, images, or paste plain text
+- 🤖 **AI-powered parsing** — Gemini (primary), OpenAI, and Claude with automatic fallback
+- ✏️ **Event review & editing** — Edit titles, dates, times, location, description, and recurrence rules before pushing
+- 📆 **Google Calendar push** — OAuth2-based integration to push events directly
+- 📥 **ICS export** — Download `.ics` files for any calendar app
+- 🔍 **Session management** — Search, filter by status, multi-select, and bulk delete
+- 🏷️ **Auto-generated titles** — Session names derived from filenames or content
+- 🚦 **Rate limiting** — Per-user, per-IP, and global daily limits
+- 🔐 **Auth** — Supabase-based email authentication
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-| :--- | :--- |
-| **Framework** | [Next.js 16](https://nextjs.org/) (App Router, Server Actions) |
-| **Styling** | [Tailwind CSS 4](https://tailwindcss.com/) |
-| **Database** | [PostgreSQL](https://www.postgresql.org/) (via [Supabase](https://supabase.com/)) |
-| **Authentication** | [Supabase Auth](https://supabase.com/auth) |
-| **AI Layer** | Gemini API, OpenAI SDK, Anthropic SDK, Minimax |
-| **Calendar** | Google Calendar API, Microsoft Graph API, `ical-generator` |
+| Layer | Tech |
+|-------|------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS 4 |
+| Auth & DB | Supabase (PostgreSQL, Auth, Storage) |
+| AI | Google Gemini, OpenAI, Anthropic Claude |
+| Calendar | Google Calendar API, ical-generator |
+| Validation | Zod |
+| Icons | Lucide React |
 
----
+## 🚀 Getting Started
 
-## 📦 Getting Started
+### Prerequisites
 
-### 1. Prerequisites
 - Node.js 18+
 - A [Supabase](https://supabase.com) project
 - At least one AI provider API key (Gemini recommended)
+- Google Cloud project with Calendar API enabled (for push)
 
-### 2. Setup
+### 1. Clone & install
+
 ```bash
 git clone https://github.com/nodesagar/parsecal.git
-cd calendarai
+cd parsecal
 npm install
 ```
 
-### 3. Environment Configuration
-Create a `.env.local` file and populate it with your credentials:
+### 2. Environment variables
 
-```bash
+Create a `.env.local` file:
+
+```env
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+SUPABASE_UPLOADS_BUCKET=uploads
 
-# Intelligence Providers
+# AI Providers (at least one required)
 GEMINI_API_KEY=your_gemini_key
 OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key
-MINIMAX_API_KEY=your_minimax_key
 
-# OAuth Redirects
-GOOGLE_CALENDAR_CLIENT_ID=your_client_id
-GOOGLE_CALENDAR_CLIENT_SECRET=your_client_secret
-MICROSOFT_CLIENT_ID=your_client_id
-MICROSOFT_CLIENT_SECRET=your_client_secret
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Google Calendar OAuth
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/calendar/google/callback
 ```
 
-### 4. Database Setup
-Run the migrations located in `supabase/migrations/` in your Supabase SQL Editor.
+### 3. Database setup
 
-### 5. Launch
+Run the migrations in your Supabase SQL Editor:
+
+```sql
+-- Run the contents of:
+-- supabase/migrations/001_initial_schema.sql
+-- supabase/migrations/002_add_session_title.sql
+-- supabase/migrations/003_add_uploads_storage_bucket.sql
+```
+
+### 4. Run
+
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
----
-
 ## 📁 Project Structure
 
-```bash
+```
 src/
 ├── app/
-│   ├── (auth)/           # Authentication flows (Login, Signup)
-│   ├── (protected)/      # Application Dashboard and Settings
-│   └── api/              # Ingestion, Sync, and Validation endpoints
+│   ├── (auth)/           # Login, signup, auth callback
+│   ├── (protected)/      # Dashboard, parse review, settings
+│   └── api/              # Parse, calendar push/export, auth
 ├── components/
-│   ├── dashboard/        # Advanced session list and filtering logic
-│   └── ui/               # Reusable primitive UI components
+│   └── dashboard/        # Session list (search, filters, multi-select)
 ├── lib/
-│   ├── ai/               # AI provider abstraction layer
-│   ├── calendar/         # Integration wrappers for Google/Outlook
-│   └── supabase/         # Data persistence and auth helpers
-└── types/                 # Domain-driven TypeScript definitions
+│   ├── ai/               # Provider abstraction (Gemini, OpenAI, Claude)
+│   ├── calendar/          # Google Calendar integration
+│   └── supabase/          # Client, server, middleware helpers
+└── types/                 # TypeScript types
 ```
 
+## 🧠 How It Works
+
+1. **Upload** a PDF, image, or paste text on the parse page
+2. **AI extracts** structured events (title, date, time, location, recurrence)
+3. **Review & edit** events — adjust details, add custom recurrence rules
+4. **Push** to Google Calendar or **export** as `.ics`
+
+## 💡 Why I Built This
+
+I kept getting schedules in formats that were anything but calendar-friendly — PDFs from university, event flyers, text dumps from group chats. Manually creating each event felt like a crime against productivity. So I built a tool to do it for me. If it saves you even 10 minutes, it was worth it.
+
 ---
 
-## 🧠 Why Build This?
+## 📬 Let's Connect!
 
-I kept getting event schedules in formats that were anything but calendar-friendly — PDFs from university, event flyers, or text dumps from group chats. Manually creating each event felt like a crime against productivity. So I built ParseCal to do it for me. It’s about spending less time entering data and more time doing what’s on your schedule.
+If you like this project or want to chat about web dev, AI, or side projects — reach out!
 
----
-
-## 📬 Contact
-
-**Sagar**  
-[![X](https://img.shields.io/badge/X-@nodesagar-blue?style=flat-square&logo=x)](https://x.com/nodesagar)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Sagar-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/nodesagar)
-[![GitHub](https://img.shields.io/badge/GitHub-@nodesagar-black?style=flat-square&logo=github)](https://github.com/nodesagar)
+- **X (Twitter):** [@nodesagar](https://twitter.com/nodesagar)
+- **LinkedIn:** [in/nodesagar](https://linkedin.com/in/nodesagar)
+- **Instagram:** [@nodesagar](https://instagram.com/nodesagar)
+- **GitHub:** [@nodesagar](https://github.com/nodesagar)
 
 ---
 
 <div align="center">
-  Built with ❤️ and ☕ by <b>nodesagar</b>
+
+Built with ❤️ and ☕ by **Sagar**
+
+*If you found this project cool, consider giving it a ⭐!*
+
 </div>
