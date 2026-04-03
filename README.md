@@ -58,6 +58,8 @@ Create a `.env.local` file:
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+SUPABASE_UPLOADS_BUCKET=uploads
 
 # AI Providers (at least one required)
 GEMINI_API_KEY=your_gemini_key
@@ -78,6 +80,7 @@ Run the migrations in your Supabase SQL Editor:
 -- Run the contents of:
 -- supabase/migrations/001_initial_schema.sql
 -- supabase/migrations/002_add_session_title.sql
+-- supabase/migrations/003_add_uploads_storage_bucket.sql
 ```
 
 ### 4. Run
@@ -136,4 +139,3 @@ Built with ❤️ and ☕ by **Sagar**
 *If you found this project cool, consider giving it a ⭐!*
 
 </div>
-

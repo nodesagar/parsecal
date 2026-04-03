@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { getFallbackProviders } from '@/lib/ai/provider-factory';
 import { NextResponse } from 'next/server';
 import type { AIProviderName, ParseInput, ParsedEventFromAI } from '@/types';
@@ -11,6 +12,7 @@ const GLOBAL_DAILY_PARSE_LIMIT = parseInt(process.env.GLOBAL_DAILY_PARSE_LIMIT |
 const PER_USER_RPM = 3; // Max 3 parses per minute per user
 const PER_IP_RPM = 5;   // Max 5 parses per minute per IP
 const ALLOWED_INPUT_TYPES: ParseInput['type'][] = ['pdf', 'image', 'text'];
+const UPLOADS_BUCKET = process.env.SUPABASE_UPLOADS_BUCKET || 'uploads';
 const ALLOWED_IMAGE_MIME_TYPES = new Set([
     'image/png',
     'image/jpeg',
@@ -43,6 +45,19 @@ function buildSessionTitleFromFileName(fileName: string): string {
         .split(' ')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
+}
+
+function isBucketMissingError(message: string | undefined): boolean {
+    if (!message) return false;
+    return /bucket not found/i.test(message);
+}
+
+function isNonCriticalStorageUploadError(message: string | undefined): boolean {
+    if (!message) return false;
+    return (
+        isBucketMissingError(message) ||
+        /row-level security|permission denied|access denied/i.test(message)
+    );
 }
 
 export async function POST(request: Request) {
@@ -153,13 +168,14 @@ export async function POST(request: Request) {
         let fileBase64 = '';
         let fileMimeType = '';
         let fileBuffer: Buffer | null = null;
+        let storageWarning: string | null = null;
         const sanitizedFileName = file ? sanitizeFileName(file.name) : null;
 
         if (file) {
             fileBuffer = Buffer.from(await file.arrayBuffer());
             fileBase64 = fileBuffer.toString('base64');
             fileMimeType = file.type;
-            filePath = `uploads/${user.id}/${sessionId}/${sanitizedFileName}`;
+            filePath = `${user.id}/${sessionId}/${sanitizedFileName}`;
         }
 
         // Auto-generate initial session title
@@ -195,17 +211,58 @@ export async function POST(request: Request) {
 
         // Upload file to Supabase Storage if present
         if (file && fileBuffer) {
-            const { error: uploadError } = await supabase.storage
-                .from('uploads')
+            const adminClient = createAdminClient();
+            const storageClient = adminClient ?? supabase;
+
+            let { error: uploadError } = await storageClient.storage
+                .from(UPLOADS_BUCKET)
                 .upload(filePath!, fileBuffer, { contentType: file.type });
+
+            // Auto-provision the uploads bucket when running with service role credentials.
+            if (uploadError && isBucketMissingError(uploadError.message) && adminClient) {
+                const { error: createBucketError } = await adminClient.storage.createBucket(
+                    UPLOADS_BUCKET,
+                    {
+                        public: false,
+                        fileSizeLimit: 25 * 1024 * 1024,
+                        allowedMimeTypes: [
+                            'application/pdf',
+                            'image/png',
+                            'image/jpeg',
+                            'image/jpg',
+                            'image/webp',
+                            'image/heic',
+                        ],
+                    }
+                );
+
+                if (createBucketError && !/already exists/i.test(createBucketError.message)) {
+                    console.error('Bucket creation error:', createBucketError);
+                } else {
+                    const retry = await adminClient.storage
+                        .from(UPLOADS_BUCKET)
+                        .upload(filePath!, fileBuffer, { contentType: file.type });
+                    uploadError = retry.error;
+                }
+            }
 
             if (uploadError) {
                 console.error('File upload error:', uploadError);
-                await supabase
-                    .from('parse_sessions')
-                    .update({ status: 'failed', error_message: 'Failed to upload input file' })
-                    .eq('id', session.id);
-                return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+                const userMessage = isBucketMissingError(uploadError.message)
+                    ? `Storage bucket "${UPLOADS_BUCKET}" is missing. Create it in Supabase Storage, or set SUPABASE_SERVICE_ROLE_KEY on the server for auto-provisioning.`
+                    : 'Failed to upload file';
+
+                if (isNonCriticalStorageUploadError(uploadError.message)) {
+                    // File content is already loaded in-memory and parse can proceed.
+                    storageWarning = userMessage;
+                } else {
+                    await supabase
+                        .from('parse_sessions')
+                        .update({ status: 'failed', error_message: 'Failed to upload input file' })
+                        .eq('id', session.id);
+
+                    return NextResponse.json({ error: userMessage }, { status: 500 });
+                }
             }
         }
 
@@ -349,6 +406,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             sessionId: session.id,
             eventCount: events.length,
+            storageWarning,
         });
     } catch (error) {
         console.error('Parse error:', error);

@@ -1,5 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { NextResponse } from 'next/server';
+
+const UPLOADS_BUCKET = process.env.SUPABASE_UPLOADS_BUCKET || 'uploads';
+
+function isIgnorableStorageDeleteError(message: string | undefined): boolean {
+    if (!message) return false;
+    return /not found/i.test(message);
+}
 
 export async function DELETE(
     _request: Request,
@@ -32,11 +40,13 @@ export async function DELETE(
 
         // Delete uploaded file from storage if exists
         if (session.input_file_path) {
-            const { error: storageDeleteError } = await supabase.storage
-                .from('uploads')
+            const adminClient = createAdminClient();
+            const storageClient = adminClient ?? supabase;
+            const { error: storageDeleteError } = await storageClient.storage
+                .from(UPLOADS_BUCKET)
                 .remove([session.input_file_path]);
 
-            if (storageDeleteError) {
+            if (storageDeleteError && !isIgnorableStorageDeleteError(storageDeleteError.message)) {
                 console.error('Storage delete error:', storageDeleteError);
                 return NextResponse.json({ error: 'Failed to delete uploaded file' }, { status: 500 });
             }
