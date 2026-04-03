@@ -127,6 +127,10 @@ function SettingsContent() {
         window.location.href = '/api/auth/calendar/google/init?next=%2Fsettings%3Ftab%3Dcalendars';
     }
 
+    function handleConnectOutlook() {
+        window.location.href = '/api/auth/calendar/outlook/init?next=%2Fsettings%3Ftab%3Dcalendars';
+    }
+
     if (loading) {
         return (
             <div className="p-6 md:p-8 max-w-2xl mx-auto">
@@ -140,6 +144,7 @@ function SettingsContent() {
     }
 
     const googleConnected = calendars.find(c => c.provider === 'google');
+    const outlookConnected = calendars.find(c => c.provider === 'outlook');
 
     return (
         <div className="p-6 md:p-8 max-w-2xl mx-auto">
@@ -307,19 +312,34 @@ function SettingsContent() {
                         )}
 
                         {/* Microsoft Outlook */}
-                        <div className="flex items-center justify-between p-4 bg-bg rounded-[10px] border border-border opacity-60">
+                        <div className="flex items-center justify-between p-4 bg-bg rounded-[10px] border border-border">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-primary/10 rounded-[10px] flex items-center justify-center">
-                                    <Calendar className="w-5 h-5 text-primary" />
+                                <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center ${outlookConnected ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
+                                    <Calendar className="w-5 h-5" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-text">Microsoft Outlook</p>
-                                    <p className="text-xs text-text-muted">Coming soon</p>
+                                    <p className="text-xs text-text-muted">
+                                        {outlookConnected ? outlookConnected.calendar_name : 'Not connected'}
+                                    </p>
                                 </div>
                             </div>
-                            <button disabled className="text-sm font-medium bg-border text-text-muted px-4 py-2 rounded-[10px] cursor-not-allowed">
-                                Connect
-                            </button>
+                            {outlookConnected ? (
+                                <button
+                                    onClick={() => disconnectCalendar(outlookConnected.id)}
+                                    className="p-2 text-text-muted hover:text-error hover:bg-error/10 rounded-[8px] cursor-pointer transition-colors"
+                                    title="Disconnect Calendar"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleConnectOutlook}
+                                    className="text-sm font-medium bg-primary text-white px-4 py-2 rounded-[10px] cursor-pointer hover:bg-primary-dark"
+                                >
+                                    Connect
+                                </button>
+                            )}
                         </div>
 
                         <div className="text-center py-4 mt-2">
