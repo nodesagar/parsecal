@@ -38,21 +38,11 @@ export default function SignupPage() {
         }
     };
 
-    const handleOAuthLogin = async (provider: 'google' | 'azure') => {
+    const handleOAuthLogin = (provider: 'google' | 'azure') => {
         setLoading(true);
         setError(null);
-
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider,
-            options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
-            },
-        });
-
-        if (error) {
-            setError(error.message);
-            setLoading(false);
-        }
+        const next = encodeURIComponent('/dashboard');
+        window.location.assign(`/api/auth/oauth/${provider}?next=${next}`);
     };
 
     if (success) {

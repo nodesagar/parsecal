@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
+import { resolveAppBaseUrl } from '@/lib/url/base-url';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url);
+    const { searchParams } = new URL(request.url);
+    const baseUrl = resolveAppBaseUrl(request);
     const code = searchParams.get('code');
     const error = searchParams.get('error');
     const errorDescription = searchParams.get('error_description');
@@ -11,28 +13,20 @@ export async function GET(request: Request) {
 
     if (error || errorDescription) {
         const message = errorDescription || error || 'oauth_error';
-        return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(message)}`);
+        return NextResponse.redirect(`${baseUrl}/login?error=${encodeURIComponent(message)}`);
     }
 
     if (code) {
         const supabase = await createClient();
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (!exchangeError) {
-            const forwardedHost = request.headers.get('x-forwarded-host');
-            const isLocalEnv = process.env.NODE_ENV === 'development';
-            if (isLocalEnv) {
-                return NextResponse.redirect(`${origin}${next}`);
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`);
-            } else {
-                return NextResponse.redirect(`${origin}${next}`);
-            }
+            return NextResponse.redirect(`${baseUrl}${next}`);
         }
 
         return NextResponse.redirect(
-            `${origin}/login?error=${encodeURIComponent(exchangeError.message)}`
+            `${baseUrl}/login?error=${encodeURIComponent(exchangeError.message)}`
         );
     }
 
-    return NextResponse.redirect(`${origin}/login?error=missing_auth_code`);
+    return NextResponse.redirect(`${baseUrl}/login?error=missing_auth_code`);
 }
