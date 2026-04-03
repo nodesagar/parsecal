@@ -6,6 +6,7 @@ import {
     Upload,
     Plus,
     Clock,
+    Calendar,
 } from 'lucide-react';
 import SessionList from '@/components/dashboard/session-list';
 
@@ -23,6 +24,14 @@ export default async function DashboardPage() {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
+
+    const { data: googleCalendar } = await supabase
+        .from('connected_calendars')
+        .select('id, calendar_name')
+        .eq('user_id', user?.id)
+        .eq('provider', 'google')
+        .eq('is_active', true)
+        .maybeSingle();
 
     const parseLimit = parseInt(process.env.MONTHLY_PARSE_LIMIT || '20');
     const parsesUsed = profile?.monthly_parse_count ?? 0;
@@ -59,6 +68,29 @@ export default async function DashboardPage() {
                     New Parse
                 </span>
             </Link>
+
+            {/* Calendar Connect Shortcut */}
+            {!googleCalendar && (
+                <div className="bg-bg-card border border-border rounded-[16px] p-5 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-[10px] flex items-center justify-center flex-shrink-0">
+                            <Calendar className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                            <h2 className="text-sm font-semibold text-text">Connect Google Calendar</h2>
+                            <p className="text-xs text-text-muted mt-1">
+                                Push events directly from review to your calendar without visiting Settings.
+                            </p>
+                        </div>
+                    </div>
+                    <Link
+                        href="/api/auth/calendar/google/init?next=%2Fdashboard"
+                        className="inline-flex items-center justify-center bg-primary hover:bg-primary-dark text-white font-semibold px-4 py-2.5 rounded-[10px] text-sm"
+                    >
+                        Connect Calendar
+                    </Link>
+                </div>
+            )}
 
             {/* Usage Meter */}
             <div className="bg-bg-card border border-border rounded-[16px] p-5 mb-8">

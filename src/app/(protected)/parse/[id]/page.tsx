@@ -47,6 +47,7 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 
 export default function ReviewPage() {
     const params = useParams();
+    const sessionId = params.id as string;
     const supabase = createClient();
 
     const [session, setSession] = useState<ParseSession | null>(null);
@@ -64,8 +65,6 @@ export default function ReviewPage() {
 
     // We only want to load initially
     const loadData = useCallback(async () => {
-        const sessionId = params.id as string;
-
         const { data: sessionData } = await supabase
             .from('parse_sessions')
             .select('*')
@@ -96,7 +95,7 @@ export default function ReviewPage() {
         setSession(sessionData);
         setEvents(eventsData || []);
         setLoading(false);
-    }, [params.id, supabase]);
+    }, [sessionId, supabase]);
 
     useEffect(() => {
         loadData();
@@ -214,6 +213,9 @@ export default function ReviewPage() {
 
     const selectedCount = events.filter((e) => e.is_selected && !e.pushed_at).length;
     const alreadyPushedCount = events.filter((e) => e.pushed_at).length;
+    const googleConnected = connectedProviders.includes('google');
+    const outlookConnected = connectedProviders.includes('outlook');
+    const connectGoogleHref = `/api/auth/calendar/google/init?next=${encodeURIComponent(`/parse/${sessionId}`)}`;
 
     if (loading) {
         return (
@@ -689,26 +691,35 @@ export default function ReviewPage() {
             {/* Push Bar */}
             {events.length > 0 && selectedCount > 0 && !pushResult && (
                 <div className="sticky bottom-0 md:bottom-auto bg-bg-card border border-border rounded-[16px] p-4 flex flex-col md:flex-row items-center gap-4">
-                    <div className="flex-1 flex flex-col md:flex-row items-center gap-3 w-full">
-                        <div className="relative w-full md:w-auto">
-                            <select
-                                value={selectedProvider}
-                                onChange={(e) => setSelectedProvider(e.target.value)}
-                                className="w-full md:w-auto appearance-none bg-bg border border-border rounded-[10px] pl-10 pr-10 py-2.5 text-sm font-medium text-text focus:border-primary focus:outline-none cursor-pointer"
-                            >
-                                {connectedProviders.includes('google') && <option value="google">Google Calendar</option>}
-                                {connectedProviders.includes('outlook') && <option value="outlook">Outlook Calendar</option>}
-                                <option value="ics">.ics Download</option>
-                            </select>
-                            <Calendar className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                            <ChevronDown className="w-4 h-4 text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <div className="flex-1 w-full space-y-2">
+                        <div className="flex flex-col md:flex-row items-center gap-3 w-full">
+                            <div className="relative w-full md:w-auto">
+                                <select
+                                    value={selectedProvider}
+                                    onChange={(e) => setSelectedProvider(e.target.value)}
+                                    className="w-full md:w-auto appearance-none bg-bg border border-border rounded-[10px] pl-10 pr-10 py-2.5 text-sm font-medium text-text focus:border-primary focus:outline-none cursor-pointer"
+                                >
+                                    {googleConnected && <option value="google">Google Calendar</option>}
+                                    {outlookConnected && <option value="outlook">Outlook Calendar</option>}
+                                    <option value="ics">.ics Download</option>
+                                </select>
+                                <Calendar className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <ChevronDown className="w-4 h-4 text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
                         </div>
 
-                        {connectedProviders.length === 0 && selectedProvider !== 'ics' && (
-                            <span className="text-xs text-warning bg-warning/10 px-2 py-1 rounded-[6px]">
-                                Calendar not connected.{' '}
-                                <Link href="/settings" className="underline font-medium">Connect in Settings</Link>
-                            </span>
+                        {!googleConnected && (
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-primary/5 border border-primary/20 rounded-[10px] px-3 py-2.5">
+                                <span className="text-xs text-text-muted">
+                                    Want one-click push? Connect Google Calendar here.
+                                </span>
+                                <Link
+                                    href={connectGoogleHref}
+                                    className="text-xs font-semibold bg-primary text-white px-3 py-1.5 rounded-[8px] hover:bg-primary-dark"
+                                >
+                                    Connect Google Calendar
+                                </Link>
+                            </div>
                         )}
                     </div>
 

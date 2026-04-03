@@ -4,15 +4,47 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
+type OAuthStatePayload = {
+    uid: string;
+    next: string;
+};
+
+function sanitizeNextPath(value: string | null | undefined): string {
+    if (!value || !value.startsWith('/')) return '/settings?tab=calendars';
+    return value;
+}
+
+function parseOAuthState(rawState: string | null): OAuthStatePayload | null {
+    if (!rawState) return null;
+
+    try {
+        const decoded = Buffer.from(rawState, 'base64url').toString('utf8');
+        const payload = JSON.parse(decoded) as { uid?: string; next?: string };
+        if (!payload.uid) return null;
+        return {
+            uid: payload.uid,
+            next: sanitizeNextPath(payload.next),
+        };
+    } catch {
+        // Backward compatibility: old state was plain user ID.
+        return {
+            uid: rawState,
+            next: '/settings?tab=calendars',
+        };
+    }
+}
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
         const code = searchParams.get('code');
-        const state = searchParams.get('state'); // In our case, state = user.id
+        const state = searchParams.get('state');
         const error = searchParams.get('error');
+        const parsedState = parseOAuthState(state);
+        const redirectPath = parsedState?.next || '/settings?tab=calendars';
 
         // Target URL for redirection after processing
-        const nextUrl = new URL('/settings', request.url);
+        const nextUrl = new URL(redirectPath, request.url);
 
         if (error) {
             console.error('Google Auth Error:', error);
@@ -20,7 +52,7 @@ export async function GET(request: Request) {
             return NextResponse.redirect(nextUrl);
         }
 
-        if (!code || !state) {
+        if (!code || !parsedState?.uid) {
             nextUrl.searchParams.set('error', 'Missing auth parameters');
             return NextResponse.redirect(nextUrl);
         }
@@ -34,7 +66,7 @@ export async function GET(request: Request) {
         }
 
         // Optional: Ensure the state matches the logged-in user to prevent CSRF spoofing
-        if (user.id !== state) {
+        if (user.id !== parsedState.uid) {
             nextUrl.searchParams.set('error', 'User mismatch during authentication');
             return NextResponse.redirect(nextUrl);
         }
@@ -131,7 +163,7 @@ export async function GET(request: Request) {
 
     } catch (error) {
         console.error('Google callback error:', error);
-        const nextUrl = new URL('/settings', request.url);
+        const nextUrl = new URL('/settings?tab=calendars', request.url);
         nextUrl.searchParams.set('error', 'Failed to complete Calendar connection');
         return NextResponse.redirect(nextUrl);
     }

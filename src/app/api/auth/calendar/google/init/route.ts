@@ -4,7 +4,12 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+function sanitizeNextPath(value: string | null): string {
+    if (!value || !value.startsWith('/')) return '/settings?tab=calendars';
+    return value;
+}
+
+export async function GET(request: Request) {
     try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -13,8 +18,14 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Generate the Google OAuth URL targeting this user ID
-        const url = getGoogleAuthUrl(user.id);
+        const urlObj = new URL(request.url);
+        const next = sanitizeNextPath(urlObj.searchParams.get('next'));
+        const state = Buffer.from(
+            JSON.stringify({ uid: user.id, next })
+        ).toString('base64url');
+
+        // Generate the Google OAuth URL targeting this user and return path
+        const url = getGoogleAuthUrl(state);
 
         // Redirect the user to Google
         return NextResponse.redirect(url);

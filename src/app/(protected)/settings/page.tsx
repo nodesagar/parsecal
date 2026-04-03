@@ -71,6 +71,10 @@ function SettingsContent() {
         // Check for oauth redirect messages
         const error = searchParams.get('error');
         const successParam = searchParams.get('success');
+        const tabParam = searchParams.get('tab');
+        if (tabParam === 'profile' || tabParam === 'ai' || tabParam === 'calendars') {
+            setTab(tabParam);
+        }
         // eslint-disable-next-line react-hooks/set-state-in-effect
         if (error) setErrorMsg(error);
 
@@ -114,7 +118,7 @@ function SettingsContent() {
     }
 
     function handleConnectGoogle() {
-        window.location.href = '/api/auth/calendar/google/init';
+        window.location.href = '/api/auth/calendar/google/init?next=%2Fsettings%3Ftab%3Dcalendars';
     }
 
     if (loading) {
