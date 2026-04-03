@@ -1,13 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
 import { getGoogleOAuthClient, convertToGoogleEvent } from '@/lib/calendar/google';
+import {
+    createOutlookEvent,
+    convertToOutlookEvent,
+    refreshOutlookAccessToken,
+} from '@/lib/calendar/outlook';
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 
 export const maxDuration = 60;
-type PushProvider = 'google';
+type PushProvider = 'google' | 'outlook';
 
 function isSupportedProvider(value: string): value is PushProvider {
-    return value === 'google';
+    return value === 'google' || value === 'outlook';
 }
 
 export async function POST(request: Request) {
@@ -86,70 +91,172 @@ export async function POST(request: Request) {
             errors: [] as string[]
         };
 
-        const oauth2Client = getGoogleOAuthClient();
-        oauth2Client.setCredentials({
-            access_token: connection.access_token,
-            refresh_token: connection.refresh_token,
-            expiry_date: new Date(connection.token_expires_at).getTime(),
-        });
+        if (provider === 'google') {
+            const oauth2Client = getGoogleOAuthClient(request.url);
+            oauth2Client.setCredentials({
+                access_token: connection.access_token,
+                refresh_token: connection.refresh_token,
+                expiry_date: new Date(connection.token_expires_at).getTime(),
+            });
 
-        // Handle automatic token refresh if needed
-        oauth2Client.on('tokens', async (tokens) => {
-            if (tokens.refresh_token || tokens.access_token) {
-                const expiresAt = new Date();
-                if (tokens.expiry_date) {
-                    expiresAt.setTime(tokens.expiry_date);
-                } else {
-                    expiresAt.setHours(expiresAt.getHours() + 1);
+            // Handle automatic token refresh if needed.
+            oauth2Client.on('tokens', async (tokens) => {
+                if (tokens.refresh_token || tokens.access_token) {
+                    const expiresAt = new Date();
+                    if (tokens.expiry_date) {
+                        expiresAt.setTime(tokens.expiry_date);
+                    } else {
+                        expiresAt.setHours(expiresAt.getHours() + 1);
+                    }
+
+                    const { error: tokenUpdateError } = await supabase
+                        .from('connected_calendars')
+                        .update({
+                            access_token: tokens.access_token || connection.access_token,
+                            ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+                            token_expires_at: expiresAt.toISOString(),
+                        })
+                        .eq('id', connection.id);
+
+                    if (tokenUpdateError) {
+                        console.error('Failed to persist refreshed calendar token:', tokenUpdateError);
+                    }
                 }
+            });
 
-                const { error: tokenUpdateError } = await supabase
-                    .from('connected_calendars')
-                    .update({
-                        access_token: tokens.access_token || connection.access_token,
-                        ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
-                        token_expires_at: expiresAt.toISOString(),
-                    })
-                    .eq('id', connection.id);
+            const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-                if (tokenUpdateError) {
-                    console.error('Failed to persist refreshed calendar token:', tokenUpdateError);
+            for (const event of events) {
+                try {
+                    const gEvent = convertToGoogleEvent(event, userTimezone);
+                    const res = await calendar.events.insert({
+                        calendarId: connection.calendar_id,
+                        requestBody: gEvent,
+                    });
+
+                    const { error: markPushedError } = await supabase
+                        .from('parsed_events')
+                        .update({
+                            pushed_to_provider: provider,
+                            external_event_id: res.data.id,
+                            pushed_at: new Date().toISOString(),
+                        })
+                        .eq('id', event.id);
+
+                    if (markPushedError) {
+                        console.error(`Failed to mark event ${event.id} as pushed:`, markPushedError);
+                        results.failed++;
+                        results.errors.push(`Pushed "${event.title}" but failed to update local status.`);
+                        continue;
+                    }
+
+                    results.successful++;
+                } catch (e: unknown) {
+                    console.error(`Failed to push event ${event.id}:`, e);
+                    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+                    results.failed++;
+                    results.errors.push(`Failed to push "${event.title}": ${errorMessage}`);
                 }
             }
-        });
+        } else {
+            const shouldRefreshBeforePush = new Date(connection.token_expires_at).getTime() <= Date.now() + 60_000;
+            let activeAccessToken = connection.access_token;
+            let activeRefreshToken = connection.refresh_token;
 
-        const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+            if (shouldRefreshBeforePush) {
+                try {
+                    const refreshed = await refreshOutlookAccessToken(activeRefreshToken);
+                    activeAccessToken = refreshed.access_token;
+                    activeRefreshToken = refreshed.refresh_token || activeRefreshToken;
 
-        for (const event of events) {
-            try {
-                const gEvent = convertToGoogleEvent(event, userTimezone);
-                const res = await calendar.events.insert({
-                    calendarId: connection.calendar_id,
-                    requestBody: gEvent,
-                });
+                    const expiresAt = new Date(Date.now() + (refreshed.expires_in || 3600) * 1000);
+                    const { error: tokenUpdateError } = await supabase
+                        .from('connected_calendars')
+                        .update({
+                            access_token: activeAccessToken,
+                            refresh_token: activeRefreshToken,
+                            token_expires_at: expiresAt.toISOString(),
+                        })
+                        .eq('id', connection.id);
 
-                const { error: markPushedError } = await supabase
-                    .from('parsed_events')
-                    .update({
-                        pushed_to_provider: 'google',
-                        external_event_id: res.data.id,
-                        pushed_at: new Date().toISOString(),
-                    })
-                    .eq('id', event.id);
-
-                if (markPushedError) {
-                    console.error(`Failed to mark event ${event.id} as pushed:`, markPushedError);
-                    results.failed++;
-                    results.errors.push(`Pushed "${event.title}" but failed to update local status.`);
-                    continue;
+                    if (tokenUpdateError) {
+                        console.error('Failed to persist refreshed Outlook token:', tokenUpdateError);
+                    }
+                } catch (refreshError) {
+                    console.error('Failed to refresh Outlook token before push:', refreshError);
+                    return NextResponse.json(
+                        { error: 'Outlook token expired. Please reconnect Outlook Calendar in Settings.' },
+                        { status: 400 }
+                    );
                 }
+            }
 
-                results.successful++;
-            } catch (e: unknown) {
-                console.error(`Failed to push event ${event.id}:`, e);
-                const errorMessage = e instanceof Error ? e.message : 'Unknown error';
-                results.failed++;
-                results.errors.push(`Failed to push "${event.title}": ${errorMessage}`);
+            for (const event of events) {
+                try {
+                    const outlookEvent = convertToOutlookEvent(event);
+                    let res;
+                    try {
+                        res = await createOutlookEvent(
+                            activeAccessToken,
+                            connection.calendar_id,
+                            outlookEvent
+                        );
+                    } catch (firstPushError) {
+                        const firstPushErrorMessage =
+                            firstPushError instanceof Error ? firstPushError.message : String(firstPushError);
+                        const isAuthError = firstPushErrorMessage.includes('(401)');
+                        if (!isAuthError) {
+                            throw firstPushError;
+                        }
+
+                        const refreshed = await refreshOutlookAccessToken(activeRefreshToken);
+                        activeAccessToken = refreshed.access_token;
+                        activeRefreshToken = refreshed.refresh_token || activeRefreshToken;
+
+                        const expiresAt = new Date(Date.now() + (refreshed.expires_in || 3600) * 1000);
+                        const { error: tokenUpdateError } = await supabase
+                            .from('connected_calendars')
+                            .update({
+                                access_token: activeAccessToken,
+                                refresh_token: activeRefreshToken,
+                                token_expires_at: expiresAt.toISOString(),
+                            })
+                            .eq('id', connection.id);
+
+                        if (tokenUpdateError) {
+                            console.error('Failed to persist refreshed Outlook token:', tokenUpdateError);
+                        }
+
+                        res = await createOutlookEvent(
+                            activeAccessToken,
+                            connection.calendar_id,
+                            outlookEvent
+                        );
+                    }
+
+                    const { error: markPushedError } = await supabase
+                        .from('parsed_events')
+                        .update({
+                            pushed_to_provider: provider,
+                            external_event_id: res.id || null,
+                            pushed_at: new Date().toISOString(),
+                        })
+                        .eq('id', event.id);
+
+                    if (markPushedError) {
+                        console.error(`Failed to mark event ${event.id} as pushed:`, markPushedError);
+                        results.failed++;
+                        results.errors.push(`Pushed "${event.title}" but failed to update local status.`);
+                        continue;
+                    }
+
+                    results.successful++;
+                } catch (e: unknown) {
+                    console.error(`Failed to push event ${event.id}:`, e);
+                    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+                    results.failed++;
+                    results.errors.push(`Failed to push "${event.title}": ${errorMessage}`);
+                }
             }
         }
 
