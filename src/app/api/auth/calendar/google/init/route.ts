@@ -10,6 +10,9 @@ function sanitizeNextPath(value: string | null): string {
 }
 
 export async function GET(request: Request) {
+    const urlObj = new URL(request.url);
+    const next = sanitizeNextPath(urlObj.searchParams.get('next'));
+
     try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -18,19 +21,19 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const urlObj = new URL(request.url);
-        const next = sanitizeNextPath(urlObj.searchParams.get('next'));
         const state = Buffer.from(
             JSON.stringify({ uid: user.id, next })
         ).toString('base64url');
 
         // Generate the Google OAuth URL targeting this user and return path
-        const url = getGoogleAuthUrl(state);
+        const url = getGoogleAuthUrl(state, request.url);
 
         // Redirect the user to Google
         return NextResponse.redirect(url);
     } catch (error) {
         console.error('Google Auth Init Error:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        const fallback = new URL(next, request.url);
+        fallback.searchParams.set('error', 'Google Calendar integration is not configured. Please contact support.');
+        return NextResponse.redirect(fallback);
     }
 }

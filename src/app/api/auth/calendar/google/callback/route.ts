@@ -72,7 +72,7 @@ export async function GET(request: Request) {
         }
 
         // Exchange code for tokens
-        const oauth2Client = getGoogleOAuthClient();
+        const oauth2Client = getGoogleOAuthClient(request.url);
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
 

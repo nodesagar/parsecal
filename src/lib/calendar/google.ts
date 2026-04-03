@@ -1,20 +1,49 @@
 import { calendar_v3, google } from 'googleapis';
 import type { ParsedEventFromAI } from '@/types';
 
+function trimTrailingSlash(value: string) {
+    return value.endsWith('/') ? value.slice(0, -1) : value;
+}
+
+function resolveGoogleRedirectUri(requestUrl?: string) {
+    const explicitRedirectUri = process.env.GOOGLE_REDIRECT_URI?.trim();
+    if (explicitRedirectUri) {
+        return explicitRedirectUri;
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    if (appUrl) {
+        return `${trimTrailingSlash(appUrl)}/api/auth/calendar/google/callback`;
+    }
+
+    if (requestUrl) {
+        const origin = new URL(requestUrl).origin;
+        return `${origin}/api/auth/calendar/google/callback`;
+    }
+
+    return undefined;
+}
+
 /**
  * Get an initialized Google OAuth2 client
  */
-export function getGoogleOAuthClient() {
+export function getGoogleOAuthClient(requestUrl?: string) {
     const clientId = process.env.GOOGLE_CALENDAR_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CALENDAR_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri =
-        process.env.GOOGLE_REDIRECT_URI ||
-        (process.env.NEXT_PUBLIC_APP_URL
-            ? `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/calendar/google/callback`
-            : undefined);
+    const redirectUri = resolveGoogleRedirectUri(requestUrl);
 
     if (!clientId || !clientSecret || !redirectUri) {
-        throw new Error('Missing Google OAuth environment variables');
+        const missingVars: string[] = [];
+        if (!clientId) {
+            missingVars.push('GOOGLE_CLIENT_ID (or GOOGLE_CALENDAR_CLIENT_ID)');
+        }
+        if (!clientSecret) {
+            missingVars.push('GOOGLE_CLIENT_SECRET (or GOOGLE_CALENDAR_CLIENT_SECRET)');
+        }
+        if (!redirectUri) {
+            missingVars.push('GOOGLE_REDIRECT_URI or NEXT_PUBLIC_APP_URL');
+        }
+        throw new Error(`Missing Google OAuth configuration: ${missingVars.join(', ')}`);
     }
 
     return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
@@ -23,8 +52,8 @@ export function getGoogleOAuthClient() {
 /**
  * Generate the authorization URL for user consent
  */
-export function getGoogleAuthUrl(stateValue: string) {
-    const oauth2Client = getGoogleOAuthClient();
+export function getGoogleAuthUrl(stateValue: string, requestUrl?: string) {
+    const oauth2Client = getGoogleOAuthClient(requestUrl);
 
     // Define the scopes we need
     const scopes = [
