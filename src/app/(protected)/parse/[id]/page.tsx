@@ -224,6 +224,8 @@ export default function ReviewPage() {
     const googleConnected = GOOGLE_CALENDAR_INTEGRATION_ENABLED && connectedProviders.includes('google');
     const outlookConnected = connectedProviders.includes('outlook');
     const connectGoogleHref = `/api/auth/calendar/google/init?next=${encodeURIComponent(`/parse/${sessionId}`)}`;
+    const connectOutlookHref = `/api/auth/calendar/outlook/init?next=${encodeURIComponent(`/parse/${sessionId}`)}`;
+    const hasConnectedCalendar = googleConnected || outlookConnected;
 
     if (loading) {
         return (
@@ -716,17 +718,27 @@ export default function ReviewPage() {
                             </div>
                         </div>
 
-                        {GOOGLE_CALENDAR_INTEGRATION_ENABLED && !googleConnected && (
+                        {!hasConnectedCalendar && (
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-primary/5 border border-primary/20 rounded-[10px] px-3 py-2.5">
                                 <span className="text-xs text-text-muted">
-                                    Want one-click push? Connect Google Calendar here.
+                                    Want one-click push? Connect a calendar now.
                                 </span>
-                                <Link
-                                    href={connectGoogleHref}
-                                    className="text-xs font-semibold bg-primary text-white px-3 py-1.5 rounded-[8px] hover:bg-primary-dark"
-                                >
-                                    Connect Google Calendar
-                                </Link>
+                                <div className="flex items-center gap-2">
+                                    <Link
+                                        href={connectOutlookHref}
+                                        className="text-xs font-semibold bg-primary text-white px-3 py-1.5 rounded-[8px] hover:bg-primary-dark"
+                                    >
+                                        Connect Outlook
+                                    </Link>
+                                    {GOOGLE_CALENDAR_INTEGRATION_ENABLED && (
+                                        <Link
+                                            href={connectGoogleHref}
+                                            className="text-xs font-semibold bg-bg border border-border text-text px-3 py-1.5 rounded-[8px] hover:border-primary"
+                                        >
+                                            Connect Google
+                                        </Link>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
