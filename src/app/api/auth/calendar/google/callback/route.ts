@@ -48,10 +48,6 @@ export async function GET(request: Request) {
             throw new Error('No access token returned from Google');
         }
 
-        // Typically, refresh token is only returned on the *first* consent. 
-        // If we don't get one, and the user hasn't connected before, it's a problem. 
-        // But let's assume we get one because we used prompt='consent'.
-
         // Determine expiration timestamp
         const expiresAt = new Date();
         if (tokens.expiry_date) {
@@ -75,36 +71,60 @@ export async function GET(request: Request) {
             console.warn('Could not fetch primary calendar info, defaulting to primary', e);
         }
 
+        // Reuse existing refresh_token when Google does not return a new one.
+        const { data: existingConnection } = await supabase
+            .from('connected_calendars')
+            .select('id, refresh_token')
+            .eq('user_id', user.id)
+            .eq('provider', 'google')
+            .eq('calendar_id', calendarId)
+            .maybeSingle();
+
+        const refreshToken = tokens.refresh_token || existingConnection?.refresh_token;
+        if (!refreshToken) {
+            throw new Error('No refresh token returned from Google');
+        }
+
         // Upsert into connected_calendars
         // Note: For MVP we use raw tokens in the DB. In production, we'd encrypt these via pgcrypto or at app level.
-        const { error: dbError } = await supabase
+        const { data: savedConnection, error: dbError } = await supabase
             .from('connected_calendars')
             .upsert({
                 user_id: user.id,
                 provider: 'google',
                 access_token: tokens.access_token,
-                // Only overwrite refresh_token if a new one is provided
-                ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+                refresh_token: refreshToken,
                 token_expires_at: expiresAt.toISOString(),
                 calendar_id: calendarId,
                 calendar_name: calendarName,
                 is_active: true
             }, {
                 onConflict: 'user_id,provider,calendar_id'
-            });
+            })
+            .select('id')
+            .single();
 
-        if (dbError) {
+        if (dbError || !savedConnection) {
             console.error('Failed to save calendar connection:', dbError);
-            throw dbError;
+            throw dbError || new Error('Failed to save calendar connection');
         }
 
-        // Make Google the preferred provider if it's their first
+        // Keep one active calendar per provider for deterministic push behavior.
         await supabase
+            .from('connected_calendars')
+            .update({ is_active: false })
+            .eq('user_id', user.id)
+            .eq('provider', 'google')
+            .neq('id', savedConnection.id);
+
+        // Make Google the preferred provider if it's their first
+        const { error: profileUpdateError } = await supabase
             .from('profiles')
             .update({ preferred_calendar_provider: 'google' })
-            .eq('id', user.id)
-        // Can check if preferred_calendar_provider is 'manual' first if we want to be safe,
-        // but setting it to google is a good default after connecting.
+            .eq('id', user.id);
+        if (profileUpdateError) {
+            console.error('Failed to update preferred calendar provider:', profileUpdateError);
+        }
 
         nextUrl.searchParams.set('success', 'Google Calendar connected successfully!');
         return NextResponse.redirect(nextUrl);

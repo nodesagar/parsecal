@@ -10,6 +10,40 @@ export const maxDuration = 60;
 const GLOBAL_DAILY_PARSE_LIMIT = parseInt(process.env.GLOBAL_DAILY_PARSE_LIMIT || '400');
 const PER_USER_RPM = 3; // Max 3 parses per minute per user
 const PER_IP_RPM = 5;   // Max 5 parses per minute per IP
+const ALLOWED_INPUT_TYPES: ParseInput['type'][] = ['pdf', 'image', 'text'];
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/webp',
+    'image/heic',
+]);
+
+function isAllowedInputType(value: string): value is ParseInput['type'] {
+    return ALLOWED_INPUT_TYPES.includes(value as ParseInput['type']);
+}
+
+function sanitizeFileName(name: string): string {
+    const trimmed = name.trim();
+    const normalized = trimmed
+        .replace(/[\\/]/g, '-')
+        .replace(/[^\w.\- ]+/g, '')
+        .replace(/\s+/g, ' ')
+        .slice(0, 120);
+
+    return normalized || `upload-${Date.now()}`;
+}
+
+function buildSessionTitleFromFileName(fileName: string): string {
+    return fileName
+        .replace(/\.[^.]+$/, '')
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .split(' ')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
 
 export async function POST(request: Request) {
     try {
@@ -34,7 +68,9 @@ export async function POST(request: Request) {
         }
 
         // Per-IP rate limit
-        const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+        const forwardedFor = request.headers.get('x-forwarded-for');
+        const realIp = request.headers.get('x-real-ip');
+        const ip = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
         const ipRL = checkRateLimit(`ip:${ip}`, {
             maxRequests: PER_IP_RPM,
             windowMs: 60_000,
@@ -47,11 +83,16 @@ export async function POST(request: Request) {
         }
 
         // Get user profile
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', user.id)
             .single();
+
+        if (profileError) {
+            console.error('Profile fetch error:', profileError);
+            return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
+        }
 
         if (!profile) {
             return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
@@ -66,28 +107,36 @@ export async function POST(request: Request) {
             );
         }
 
-        // Global daily limit — protects Gemini free tier (only when using app keys)
-        if (!profile.custom_ai_api_key) {
-            const globalCheck = checkGlobalDailyLimit(GLOBAL_DAILY_PARSE_LIMIT);
-            if (!globalCheck.allowed) {
-                return NextResponse.json(
-                    { error: 'Daily server limit reached. Please try again tomorrow or add your own AI API key for unlimited use.' },
-                    { status: 429 }
-                );
-            }
-        }
-
         // Parse the multipart form data
         const formData = await request.formData();
-        const inputType = formData.get('inputType') as string;
-        const textInput = formData.get('textInput') as string | null;
-        const file = formData.get('file') as File | null;
+        const rawInputType = formData.get('inputType');
+        const rawTextInput = formData.get('textInput');
+        const rawFile = formData.get('file');
 
-        if (!inputType || (inputType === 'text' && !textInput) || (inputType !== 'text' && !file)) {
+        if (typeof rawInputType !== 'string' || !isAllowedInputType(rawInputType)) {
+            return NextResponse.json({ error: 'Invalid inputType' }, { status: 400 });
+        }
+
+        const inputType = rawInputType;
+        const textInput = typeof rawTextInput === 'string' ? rawTextInput : null;
+        const file = rawFile instanceof File ? rawFile : null;
+
+        if ((inputType === 'text' && !textInput?.trim()) || (inputType !== 'text' && !file)) {
             return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
         }
 
-        // Validate file size
+        // Validate file mime type and size.
+        if (inputType === 'pdf' && file?.type !== 'application/pdf') {
+            return NextResponse.json({ error: 'Only PDF files are allowed for pdf inputType.' }, { status: 400 });
+        }
+
+        if (inputType === 'image' && file && !ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
+            return NextResponse.json(
+                { error: 'Unsupported image type. Use PNG, JPG, JPEG, WEBP, or HEIC.' },
+                { status: 400 }
+            );
+        }
+
         if (file) {
             const maxSize = inputType === 'pdf' ? 25 * 1024 * 1024 : 10 * 1024 * 1024;
             if (file.size > maxSize) {
@@ -104,28 +153,19 @@ export async function POST(request: Request) {
         let fileBase64 = '';
         let fileMimeType = '';
         let fileBuffer: Buffer | null = null;
+        const sanitizedFileName = file ? sanitizeFileName(file.name) : null;
 
         if (file) {
             fileBuffer = Buffer.from(await file.arrayBuffer());
             fileBase64 = fileBuffer.toString('base64');
             fileMimeType = file.type;
-            filePath = `uploads/${user.id}/${sessionId}/${file.name}`;
+            filePath = `uploads/${user.id}/${sessionId}/${sanitizedFileName}`;
         }
 
         // Auto-generate initial session title
         let sessionTitle: string | null = null;
-        if (file) {
-            // Use filename without extension, replace separators with spaces
-            sessionTitle = file.name
-                .replace(/\.[^.]+$/, '')
-                .replace(/[_-]+/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-            // Capitalize first letter of each word
-            sessionTitle = sessionTitle
-                .split(' ')
-                .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(' ');
+        if (sanitizedFileName) {
+            sessionTitle = buildSessionTitleFromFileName(sanitizedFileName);
         } else if (textInput) {
             // Use first 60 chars of text input
             sessionTitle = textInput.trim().substring(0, 60).replace(/\n+/g, ' ').trim();
@@ -155,14 +195,23 @@ export async function POST(request: Request) {
 
         // Upload file to Supabase Storage if present
         if (file && fileBuffer) {
-            await supabase.storage
+            const { error: uploadError } = await supabase.storage
                 .from('uploads')
                 .upload(filePath!, fileBuffer, { contentType: file.type });
+
+            if (uploadError) {
+                console.error('File upload error:', uploadError);
+                await supabase
+                    .from('parse_sessions')
+                    .update({ status: 'failed', error_message: 'Failed to upload input file' })
+                    .eq('id', session.id);
+                return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
+            }
         }
 
         // Build parse input
         const parseInput: ParseInput = {
-            type: inputType as 'pdf' | 'image' | 'text',
+            type: inputType,
             content: inputType === 'text' ? (textInput || '') : fileBase64,
             mimeType: fileMimeType || undefined,
             timezone: profile.default_timezone,
@@ -181,6 +230,25 @@ export async function POST(request: Request) {
                 .eq('id', session.id);
 
             return NextResponse.json({ error: 'No AI provider available' }, { status: 500 });
+        }
+
+        // Global daily limit — protects Gemini free tier (only when using app keys)
+        if (!profile.custom_ai_api_key) {
+            const globalCheck = checkGlobalDailyLimit(GLOBAL_DAILY_PARSE_LIMIT);
+            if (!globalCheck.allowed) {
+                await supabase
+                    .from('parse_sessions')
+                    .update({
+                        status: 'failed',
+                        error_message: 'Daily server limit reached',
+                    })
+                    .eq('id', session.id);
+
+                return NextResponse.json(
+                    { error: 'Daily server limit reached. Please try again tomorrow or add your own AI API key for unlimited use.' },
+                    { status: 429 }
+                );
+            }
         }
 
         // Try providers with fallback
@@ -242,23 +310,41 @@ export async function POST(request: Request) {
                 is_edited: false,
             }));
 
-            await supabase.from('parsed_events').insert(eventRows);
+            const { error: eventInsertError } = await supabase.from('parsed_events').insert(eventRows);
+            if (eventInsertError) {
+                console.error('Parsed events insert error:', eventInsertError);
+                await supabase
+                    .from('parse_sessions')
+                    .update({
+                        status: 'failed',
+                        error_message: 'Failed to save parsed events',
+                    })
+                    .eq('id', session.id);
+                return NextResponse.json({ error: 'Failed to save parsed events' }, { status: 500 });
+            }
         }
 
         // Update session
-        await supabase
+        const { error: sessionUpdateError } = await supabase
             .from('parse_sessions')
             .update({
                 status: 'draft',
                 event_count: events.length,
             })
             .eq('id', session.id);
+        if (sessionUpdateError) {
+            console.error('Session update error:', sessionUpdateError);
+            return NextResponse.json({ error: 'Failed to finalize parse session' }, { status: 500 });
+        }
 
         // Increment monthly parse count
-        await supabase
+        const { error: profileUpdateError } = await supabase
             .from('profiles')
             .update({ monthly_parse_count: profile.monthly_parse_count + 1 })
             .eq('id', user.id);
+        if (profileUpdateError) {
+            console.error('Profile usage update error:', profileUpdateError);
+        }
 
         return NextResponse.json({
             sessionId: session.id,

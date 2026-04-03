@@ -143,15 +143,18 @@ export default function ReviewPage() {
     }
 
     async function saveEdit(eventId: string) {
+        const existingEvent = events.find((event) => event.id === eventId);
+        if (!existingEvent) return;
+
         const updatePayload = {
-            title: editValues.title,
-            description: editValues.description,
-            start_datetime: editValues.start_datetime,
-            end_datetime: editValues.end_datetime,
-            is_all_day: editValues.is_all_day,
-            location: editValues.location,
-            is_recurring: editValues.is_recurring,
-            recurrence_rule: editValues.recurrence_rule,
+            title: editValues.title ?? existingEvent.title,
+            description: editValues.description ?? existingEvent.description,
+            start_datetime: editValues.start_datetime ?? existingEvent.start_datetime,
+            end_datetime: editValues.end_datetime ?? existingEvent.end_datetime,
+            is_all_day: editValues.is_all_day ?? existingEvent.is_all_day,
+            location: editValues.location ?? existingEvent.location,
+            is_recurring: editValues.is_recurring ?? existingEvent.is_recurring,
+            recurrence_rule: editValues.recurrence_rule ?? existingEvent.recurrence_rule,
             is_edited: true,
         };
 

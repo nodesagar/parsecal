@@ -15,32 +15,43 @@ export async function DELETE(
         }
 
         // Verify the session belongs to the user
-        const { data: session } = await supabase
+        const { data: session, error: sessionError } = await supabase
             .from('parse_sessions')
             .select('id, user_id, input_file_path')
             .eq('id', sessionId)
+            .eq('user_id', user.id)
             .single();
+
+        if (sessionError) {
+            console.error('Session lookup error:', sessionError);
+        }
 
         if (!session) {
             return NextResponse.json({ error: 'Session not found' }, { status: 404 });
         }
 
-        if (session.user_id !== user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
-
         // Delete uploaded file from storage if exists
         if (session.input_file_path) {
-            await supabase.storage
+            const { error: storageDeleteError } = await supabase.storage
                 .from('uploads')
                 .remove([session.input_file_path]);
+
+            if (storageDeleteError) {
+                console.error('Storage delete error:', storageDeleteError);
+                return NextResponse.json({ error: 'Failed to delete uploaded file' }, { status: 500 });
+            }
         }
 
         // Delete parsed events (cascade should handle this, but be explicit)
-        await supabase
+        const { error: eventsDeleteError } = await supabase
             .from('parsed_events')
             .delete()
             .eq('session_id', sessionId);
+
+        if (eventsDeleteError) {
+            console.error('Parsed events delete error:', eventsDeleteError);
+            return NextResponse.json({ error: 'Failed to delete session events' }, { status: 500 });
+        }
 
         // Delete the session
         const { error } = await supabase
