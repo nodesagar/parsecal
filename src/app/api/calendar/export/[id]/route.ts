@@ -51,7 +51,7 @@ export async function GET(
 
         // Generate ICS
         const calendar = ical({
-            name: 'CalendarAI Export',
+            name: 'ParseCal Export',
             method: ICalCalendarMethod.PUBLISH,
         });
 
@@ -91,7 +91,7 @@ export async function GET(
         return new NextResponse(icsContent, {
             headers: {
                 'Content-Type': 'text/calendar; charset=utf-8',
-                'Content-Disposition': `attachment; filename="calendarai-export.ics"`,
+                'Content-Disposition': `attachment; filename="parsecal-export.ics"`,
             },
         });
     } catch (error) {

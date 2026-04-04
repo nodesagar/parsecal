@@ -48,7 +48,7 @@ export default function LoginPage() {
                 <div className="text-center mb-8">
                     <Link href="/" className="inline-flex items-center gap-2 cursor-pointer">
                         <Calendar className="w-8 h-8 text-primary" />
-                        <span className="text-2xl font-bold text-text">CalendarAI</span>
+                        <span className="text-2xl font-bold text-text">ParseCal</span>
                     </Link>
                     <p className="text-text-muted mt-2">Welcome back</p>
                 </div>

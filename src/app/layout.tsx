@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CalendarAI — Smart Calendar from Any Format",
+  title: "ParseCal — Smart Calendar from Any Format",
   description:
     "Upload PDFs, images, or text — AI extracts events and pushes them to your calendar. No more manual event creation.",
   keywords: [

@@ -12,6 +12,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowLeft,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -141,9 +142,9 @@ export default function NewParsePage() {
           <ArrowLeft className="w-4 h-4 text-text-muted" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-text">New Parse</h1>
+          <h1 className="text-2xl font-bold text-text">New Parse</h1>
           <p className="text-sm text-text-muted">
-            Upload content to extract events
+            Upload or paste schedule data to extract events.
           </p>
         </div>
       </div>
@@ -186,120 +187,128 @@ export default function NewParsePage() {
 
       {/* Step: Upload */}
       {step === "upload" && (
-        <>
-          {/* Mode Toggle */}
-          <div className="flex bg-bg border border-border rounded-[10px] p-1 mb-6">
-            <button
-              onClick={() => setMode("file")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[8px] text-sm font-medium cursor-pointer ${
-                mode === "file"
-                  ? "bg-bg-card text-text shadow-sm"
-                  : "text-text-muted hover:text-text"
+        <div className="space-y-6">
+          {/* Main Upload Card */}
+          <div
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`relative border-2 border-dashed rounded-[24px] p-16 text-center transition-all ${dragActive
+              ? "border-primary bg-primary/5"
+              : file
+                ? "border-success bg-success/5"
+                : "border-border hover:border-primary/50 bg-bg-card/50"
               }`}
-            >
-              <Upload className="w-4 h-4" />
-              Upload File
-            </button>
-            <button
-              onClick={() => setMode("text")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-[8px] text-sm font-medium cursor-pointer ${
-                mode === "text"
-                  ? "bg-bg-card text-text shadow-sm"
-                  : "text-text-muted hover:text-text"
-              }`}
-            >
-              <Type className="w-4 h-4" />
-              Paste Text
-            </button>
+          >
+            <input
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.heic"
+              onChange={handleFileChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            />
+
+            {!file ? (
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-[#eef4ff] rounded-full flex items-center justify-center mb-6">
+                  <Upload className="w-8 h-8 text-[#4182f9]" />
+                </div>
+                <h2 className="text-xl font-bold text-text mb-2">
+                  Upload or paste schedule data
+                </h2>
+                <p className="text-sm text-text-muted mb-8 max-w-sm mx-auto">
+                  PDF, images (including handwritten notes), or plain text
+                </p>
+                <div className="inline-flex items-center gap-2 bg-[#ff5c00] hover:bg-[#e65300] text-white font-bold px-8 py-3.5 rounded-[12px] text-base shadow-sm transition-all relative z-20">
+                  <Plus className="w-5 h-5" />
+                  New Parse
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <div className="w-16 h-16 bg-success/10 rounded-full flex items-center justify-center mb-4">
+                  <FileIcon className="w-8 h-8 text-success" />
+                </div>
+                <div className="mb-6">
+                  <p className="text-base font-bold text-text">
+                    {file.name}
+                  </p>
+                  <p className="text-sm text-text-muted">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB • Ready to extract
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 relative z-20">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setFile(null);
+                    }}
+                    className="px-6 py-2.5 rounded-[12px] bg-bg border border-border text-sm font-semibold text-text-muted hover:text-error hover:bg-error/5 transition-all"
+                  >
+                    Remove
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSubmit();
+                    }}
+                    className="px-8 py-2.5 rounded-[12px] bg-primary text-white text-sm font-bold shadow-sm hover:bg-primary-hover transition-all"
+                  >
+                    Extract Now
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {mode === "file" ? (
-            <>
-              {/* Drop Zone */}
-              <div
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                className={`relative border-2 border-dashed rounded-[16px] p-10 text-center cursor-pointer ${
-                  dragActive
-                    ? "border-primary bg-primary/5"
-                    : file
-                      ? "border-success bg-success/5"
-                      : "border-border hover:border-primary"
-                }`}
+          {!file && (
+            <div className="text-center">
+              <button
+                onClick={() => setMode(mode === "file" ? "text" : "file")}
+                className="text-sm font-medium text-text-muted hover:text-primary transition-colors inline-flex items-center gap-2"
               >
-                <input
-                  type="file"
-                  accept=".pdf,.png,.jpg,.jpeg,.webp,.heic"
-                  onChange={handleFileChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                {file ? (
-                  <div className="flex items-center justify-center gap-3">
-                    <FileIcon className="w-8 h-8 text-success" />
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-text">
-                        {file.name}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setFile(null);
-                      }}
-                      className="w-6 h-6 rounded-full bg-error/10 flex items-center justify-center cursor-pointer"
-                    >
-                      <X className="w-3 h-3 text-error" />
-                    </button>
-                  </div>
+                {mode === "file" ? (
+                  <>
+                    <Type className="w-4 h-4" />
+                    Prefer to paste text?
+                  </>
                 ) : (
                   <>
-                    <Upload className="w-10 h-10 text-text-light mx-auto mb-3" />
-                    <p className="text-sm font-medium text-text mb-1">
-                      Drag & drop or click to browse
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      PDF, PNG, JPG, WebP • Images up to 10MB, PDFs up to 25MB
-                    </p>
+                    <Upload className="w-4 h-4" />
+                    Back to file upload
                   </>
                 )}
-              </div>
-            </>
-          ) : (
-            /* Text Input */
-            <textarea
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Paste your schedule text here...&#10;&#10;Example:&#10;Team meeting every Monday at 9am&#10;Sprint review on Friday 3pm, Conference Room B&#10;Lunch with Sarah, March 12 at 12:30pm"
-              rows={10}
-              className="w-full bg-bg-card border border-border rounded-[16px] p-4 text-sm text-text placeholder:text-text-light focus:border-border-focus focus:outline-none resize-none"
-            />
+              </button>
+            </div>
+          )}
+
+          {mode === "text" && !file && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              <textarea
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="Paste your schedule text here...&#10;&#10;Example:&#10;Team meeting every Monday at 9am&#10;Sprint review on Friday 3pm..."
+                rows={10}
+                className="w-full bg-bg-card border border-border rounded-[20px] p-5 text-sm text-text placeholder:text-text-light focus:border-primary/50 focus:ring-2 focus:ring-primary/5 focus:outline-none resize-none transition-all"
+              />
+              <button
+                onClick={handleSubmit}
+                disabled={!textInput.trim()}
+                className="w-full bg-cta hover:bg-cta-hover text-white font-bold py-4 rounded-[14px] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+              >
+                Extract from Text
+              </button>
+            </div>
           )}
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 bg-error/10 border border-error/20 rounded-[10px] px-4 py-2.5 text-sm text-error mt-4">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className="flex items-center gap-3 bg-error/10 border border-error/20 rounded-[14px] px-5 py-4 text-sm text-error animate-in shake duration-300">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
               {error}
             </div>
           )}
-
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            disabled={
-              (mode === "file" && !file) ||
-              (mode === "text" && !textInput.trim())
-            }
-            className="w-full mt-6 bg-cta hover:bg-cta-hover text-white font-semibold py-3 rounded-[10px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            Extract Events
-          </button>
-        </>
+        </div>
       )}
 
       {/* Step: Processing */}

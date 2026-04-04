@@ -43,7 +43,7 @@ export default function ProtectedLayout({
           className="flex items-center gap-2 px-3 py-2 mb-8 cursor-pointer"
         >
           <Calendar className="w-6 h-6 text-primary" />
-          <span className="text-lg font-bold text-text">CalendarAI</span>
+          <span className="text-lg font-bold text-text">ParseCal</span>
         </Link>
 
         {/* Nav Items */}

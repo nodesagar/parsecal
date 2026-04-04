@@ -17,7 +17,7 @@ export default function LandingPage() {
       <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[16px] px-6 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <Calendar className="w-6 h-6 text-primary" />
-          <span className="text-lg font-bold text-text">CalendarAI</span>
+          <span className="text-lg font-bold text-text">ParseCal</span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
@@ -48,7 +48,7 @@ export default function LandingPage() {
           in seconds
         </h1>
         <p className="text-lg md:text-xl text-text-muted max-w-2xl mx-auto mb-10 leading-relaxed">
-          Upload a PDF, snap a photo of a timetable, or paste text — CalendarAI
+          Upload a PDF, snap a photo of a timetable, or paste text — ParseCal
           extracts every event and pushes them to your Google or Outlook
           calendar. No more manual entry.
         </p>
@@ -201,10 +201,10 @@ export default function LandingPage() {
       <footer className="border-t border-border py-8 px-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <Calendar className="w-5 h-5 text-primary" />
-          <span className="font-semibold text-text">CalendarAI</span>
+          <span className="font-semibold text-text">ParseCal</span>
         </div>
         <p className="text-sm text-text-muted">
-          © {new Date().getFullYear()} CalendarAI. Built with AI, for humans.
+          © {new Date().getFullYear()} ParseCal. Built with AI, for humans.
         </p>
       </footer>
     </div>
