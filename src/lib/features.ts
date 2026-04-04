@@ -11,12 +11,15 @@ const explicitGoogleCalendarToggle = parseBooleanEnv(
 );
 
 /**
- * Default behavior:
- * - local dev: enabled
- * - deployed environments: disabled
+ * Auto-detect: enabled when Google OAuth credentials are configured,
+ * or when explicitly toggled via env var.
  *
- * Optional override:
- * - NEXT_PUBLIC_ENABLE_GOOGLE_CALENDAR_INTEGRATION=true|false
+ * Override: NEXT_PUBLIC_ENABLE_GOOGLE_CALENDAR_INTEGRATION=true|false
  */
+const hasGoogleCredentials = Boolean(
+    (process.env.GOOGLE_CALENDAR_CLIENT_ID || process.env.GOOGLE_CLIENT_ID) &&
+    (process.env.GOOGLE_CALENDAR_CLIENT_SECRET || process.env.GOOGLE_CLIENT_SECRET)
+);
+
 export const GOOGLE_CALENDAR_INTEGRATION_ENABLED =
-    explicitGoogleCalendarToggle ?? process.env.NODE_ENV === 'development';
+    explicitGoogleCalendarToggle ?? hasGoogleCredentials;
