@@ -29,6 +29,7 @@ const ACCEPTED_TYPES = [
 ];
 
 export default function NewParsePage() {
+  const uploadInputId = "parse-upload-input";
   const [mode, setMode] = useState<InputMode>("file");
   const [file, setFile] = useState<File | null>(null);
   const [textInput, setTextInput] = useState("");
@@ -202,6 +203,7 @@ export default function NewParsePage() {
               }`}
           >
             <input
+              id={uploadInputId}
               type="file"
               accept=".pdf,.png,.jpg,.jpeg,.webp,.heic"
               onChange={handleFileChange}
@@ -219,10 +221,13 @@ export default function NewParsePage() {
                 <p className="text-sm text-text-muted mb-8 max-w-sm mx-auto">
                   PDF, images (including handwritten notes), or plain text
                 </p>
-                <div className="inline-flex items-center gap-2 bg-[#ff5c00] hover:bg-[#e65300] text-white font-bold px-8 py-3.5 rounded-[12px] text-base shadow-sm transition-all relative z-20">
+                <label
+                  htmlFor={uploadInputId}
+                  className="inline-flex items-center gap-2 bg-[#ff5c00] hover:bg-[#e65300] text-white font-bold px-8 py-3.5 rounded-[12px] text-base shadow-sm transition-all relative z-20 cursor-pointer"
+                >
                   <Plus className="w-5 h-5" />
                   New Parse
-                </div>
+                </label>
               </div>
             ) : (
               <div className="flex flex-col items-center">
