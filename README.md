@@ -104,7 +104,21 @@ Visit [localhost:3000](http://localhost:3000) to start parsing.
 
 ```bash
 src/
+├── app/                  # Next.js App Router (Auth/Protected/API)
+├── components/           # UI Design System (Dashboard/Parse/Review)
+├── lib/                  # Core Logic (AI Abstraction, Calendar, Supabase)
+├── hooks/                # Custom React Hooks
+└── types/                # Strict Type Definitions
+```
 
-*If you found this project cool, consider giving it a ⭐!*
+---
 
+<div align="center">
+  <p>Built with ❤️ and ☕ by <b>Sagar</b></p>
+  <p>
+    <a href="https://twitter.com/nodesagar">Twitter</a> • 
+    <a href="https://github.com/nodesagar">GitHub</a> • 
+    <a href="https://linkedin.com/in/nodesagar">LinkedIn</a>
+  </p>
+  <p><i>If ParseCal saved you time, consider giving it a ⭐!</i></p>
 </div>
