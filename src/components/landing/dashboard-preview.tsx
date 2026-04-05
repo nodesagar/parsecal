@@ -172,11 +172,30 @@ export default function DashboardPreview() {
                       onClick={() => setProvider("outlook")}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'outlook' ? 'bg-white shadow-md border border-border text-[#0078d4]' : 'text-text-muted hover:text-text'}`}
                     >
-                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 16.5V7.5L12 3L3 7.5V16.5L12 21L21 16.5Z" fill="#0078D4" />
-                        <path d="M12 3V21L21 16.5V7.5L12 3Z" fill="#005A9E" />
-                        <path d="M12 11.25H21V12.75H12V11.25Z" fill="white" fillOpacity="0.2" />
-                        <path d="M7 9C5.89543 9 5 9.89543 5 11V13C5 14.1046 5.89543 15 7 15H9C10.1046 15 11 14.1046 11 13V11C11 9.89543 10.1046 9 9 9H7ZM7 10.5H9C9.27614 10.5 9.5 10.7239 9.5 11V13C9.5 13.2761 9.27614 13.5 9 13.5H7C6.72386 13.5 6.5 13.2761 6.5 11V11C6.5 10.7239 6.72386 10.5 7 10.5Z" fill="white" />
+                      <svg className="w-3.5 h-3.5" viewBox="60 90.4 570.02 539.67" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                          <linearGradient id="outlook-linear0" gradientUnits="userSpaceOnUse" x1="9.98908" y1="22.3649" x2="30.9322" y2="9.37495" gradientTransform="matrix(15,0,0,15,0,0)">
+                            <stop offset="0" stopColor="#20A7FA"/><stop offset="0.4" stopColor="#3BD5FF"/><stop offset="1" stopColor="#C4B0FF"/>
+                          </linearGradient>
+                          <linearGradient id="outlook-linear1" gradientUnits="userSpaceOnUse" x1="17.1972" y1="26.7945" x2="28.8562" y2="8.12575" gradientTransform="matrix(15,0,0,15,0,0)">
+                            <stop offset="0" stopColor="#165AD9"/><stop offset="0.5" stopColor="#1880E5"/><stop offset="1" stopColor="#8587FF"/>
+                          </linearGradient>
+                          <linearGradient id="outlook-linear3" gradientUnits="userSpaceOnUse" x1="24.0534" y1="31.1099" x2="44.51" y2="18.0177" gradientTransform="matrix(15,0,0,15,0,0)">
+                            <stop offset="0" stopColor="#1A43A6"/><stop offset="0.49" stopColor="#2052CB"/><stop offset="1" stopColor="#5F20CB"/>
+                          </linearGradient>
+                          <linearGradient id="outlook-linear5" gradientUnits="userSpaceOnUse" x1="41.998" y1="29.9431" x2="23.8517" y2="29.9431" gradientTransform="matrix(15,0,0,15,0,0)">
+                            <stop offset="0" stopColor="#4DC4FF"/><stop offset="0.2" stopColor="#0FAF9FF"/>
+                          </linearGradient>
+                          <radialGradient id="outlook-radial4" gradientUnits="userSpaceOnUse" cx="0" cy="0" fx="0" fy="0" r="1" gradientTransform="matrix(215.767,230.769,-230.769,215.767,59.144,354.231)">
+                            <stop offset="0.04" stopColor="#0091FF"/><stop offset="0.92" stopColor="#183DAD"/>
+                          </radialGradient>
+                        </defs>
+                        <path fill="url(#outlook-linear0)" d="M463.98 140.14L119.64 358.41L90.02 311.7L90.02 271.44C90.02 256.78 97.45 243.12 109.74 235.14L309.91 105.26C340.41 85.47 379.69 85.46 410.19 105.25L463.98 140.14Z"/>
+                        <path fill="url(#outlook-linear1)" d="M407.1 103.34C408.14 103.95 409.16 104.59 410.18 105.25L566.4 206.59L179.06 452.11L119.63 358.34L403.89 177.8C430.82 160.7 432 122.23 407.1 103.34Z"/>
+                        <path fill="url(#outlook-linear3)" d="M333.6 498.99L179.07 452.11L507.63 243.84C535.3 226.3 535.23 185.9 507.5 168.46L506.02 167.53L510.28 170.18L610.27 235.04C622.57 243.02 630 256.68 630 271.34L630 310.3L333.6 498.99Z"/>
+                        <path fill="url(#outlook-linear5)" d="M315.77 630.05L536.22 630.05C588 630.05 630 588.08 630 536.3L630 272.14C630 287.44 622.11 301.67 609.15 309.8L281.24 515.7C263.55 526.8 252.82 546.22 252.82 567.11C252.82 601.87 281 630.05 315.77 630.05Z"/>
+                        <path fill="url(#outlook-radial4)" d="M108.75 345L251.25 345C278.18 345 300 366.82 300 393.75L300 536.25C300 563.18 278.18 585 251.25 585L108.75 585C81.82 585 60 563.18 60 536.25L60 393.75C60 366.82 81.82 345 108.75 345Z"/>
+                        <path fill="white" d="M179.39 534C159.54 534 143.25 527.79 130.51 515.38C117.77 502.96 111.4 486.76 111.4 466.77C111.4 445.66 117.87 428.59 130.8 415.55C143.73 402.52 160.66 396 181.59 396C201.38 396 217.47 402.24 229.89 414.71C242.38 427.19 248.62 443.64 248.62 464.07C248.62 485.05 242.15 501.96 229.22 514.82C216.35 527.61 199.74 534 179.39 534ZM179.96 507.65C190.78 507.65 199.48 503.95 206.08 496.57C212.67 489.18 215.97 478.9 215.97 465.74C215.97 452.02 212.77 441.35 206.37 433.71C199.96 426.07 191.42 422.26 180.73 422.26C169.72 422.26 160.85 426.2 154.13 434.08C147.41 441.91 144.05 452.27 144.05 465.18C144.05 478.29 147.41 488.65 154.13 496.29C160.85 503.86 169.46 507.65 179.96 507.65Z"/>
                       </svg>
                       Outlook
                     </button>
