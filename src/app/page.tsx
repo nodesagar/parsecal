@@ -294,15 +294,70 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 px-6 text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Calendar className="w-5 h-5 text-primary" />
-          <span className="font-semibold text-text">ParseCal</span>
+      {/* Footer - Premium Multi-column */}
+      <footer className="border-t border-border bg-bg-card/50 pt-20 pb-12 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
+            {/* Brand Section */}
+            <div className="col-span-2 lg:col-span-2">
+              <Link href="/" className="flex items-center gap-2 mb-6">
+                <Calendar className="w-6 h-6 text-primary" />
+                <span className="text-xl font-black text-text tracking-tight">ParseCal</span>
+              </Link>
+              <p className="text-sm text-text-muted font-medium max-w-[280px] mb-6 leading-relaxed">
+                The autonomous extraction protocol for real-world schedules. 
+                Turn unstructured chaos into structured productivity.
+              </p>
+              <div className="flex items-center gap-2 px-3 py-1 bg-success/5 border border-success/20 rounded-full w-fit">
+                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                <span className="text-[10px] font-black text-success uppercase tracking-widest">System Operational</span>
+              </div>
+            </div>
+
+            {/* Product Column */}
+            <div>
+              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-6">Product</h4>
+              <ul className="space-y-4">
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Visual Engine</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Document Parse</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">API Access</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Integrations</Link></li>
+              </ul>
+            </div>
+
+            {/* Resources Column */}
+            <div>
+              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-6">Resources</h4>
+              <ul className="space-y-4">
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Documentation</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Changelog</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Pricing</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Community</Link></li>
+              </ul>
+            </div>
+
+            {/* Company Column */}
+            <div>
+              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-6">Legal</h4>
+              <ul className="space-y-4">
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Open Source</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-border/50 gap-4">
+            <p className="text-[11px] font-black text-text-light uppercase tracking-widest">
+              © {new Date().getFullYear()} ParseCal. Engineered for clarity.
+            </p>
+            <div className="flex items-center gap-6">
+              <span className="text-[10px] font-black text-text-light uppercase tracking-tighter italic opacity-50 underline decoration-primary decoration-2 underline-offset-4">
+                Powered by Advanced AI Nodes
+              </span>
+            </div>
+          </div>
         </div>
-        <p className="text-sm text-text-muted">
-          © {new Date().getFullYear()} ParseCal. Built with AI, for humans.
-        </p>
       </footer>
     </div>
   );
