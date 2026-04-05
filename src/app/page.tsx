@@ -308,15 +308,6 @@ export default function LandingPage() {
                 Automatically scan any schedule and create calendar events. 
                 Turn messy notes into organized productivity.
               </p>
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 px-3 py-1 bg-success/5 border border-success/20 rounded-full">
-                  <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] font-black text-success uppercase tracking-widest">System Status: Live</span>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/20 rounded-full">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-widest text-nowrap">v1.2.0-STABLE</span>
-                </div>
-              </div>
             </div>
 
             {/* Live History & System Ops */}
