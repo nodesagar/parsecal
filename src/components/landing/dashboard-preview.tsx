@@ -13,7 +13,12 @@ import {
   Plus,
   X,
   Sparkles,
+  CheckCircle2,
+  Globe,
+  Settings,
 } from "lucide-react";
+
+type Tab = "dashboard" | "parses" | "connected";
 
 const MOCK_EVENTS = [
   { id: "1", title: "Product Sync", start: "2026-04-13T10:00:00", provider: "google" as const, location: "Meeting Room A" },
@@ -30,7 +35,7 @@ const MOCK_SESSIONS = [
     input_type: "pdf",
     status: "pushed",
     event_count: 12,
-    created_at: new Date().toISOString(),
+    date: "Apr 12",
   },
   {
     id: "s2",
@@ -38,11 +43,28 @@ const MOCK_SESSIONS = [
     input_type: "text",
     status: "draft",
     event_count: 1,
-    created_at: new Date().toISOString(),
+    date: "Apr 10",
+  },
+  {
+    id: "s3",
+    title: "Project Sync Transcript",
+    input_type: "text",
+    status: "failed",
+    event_count: 0,
+    date: "Apr 08",
+  },
+  {
+    id: "s4",
+    title: "Flight Itinerary",
+    input_type: "pdf",
+    status: "pushed",
+    event_count: 3,
+    date: "Apr 05",
   },
 ];
 
 export default function DashboardPreview() {
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 1)); // April 2026
   const [filter, setFilter] = useState<"all" | "draft">("all");
   const [selectedEvent, setSelectedEvent] = useState<typeof MOCK_EVENTS[0] | null>(null);
@@ -57,13 +79,13 @@ export default function DashboardPreview() {
   const goToday = () => setCurrentDate(new Date(2026, 3, 6));
 
   const filteredSessions = useMemo(() => {
-    if (filter === "all") return MOCK_SESSIONS;
+    if (filter === "all") return MOCK_SESSIONS.slice(0, 2);
     return MOCK_SESSIONS.filter(s => s.status === "draft");
   }, [filter]);
 
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-6 text-left relative">
-      {/* Sidebar (Mock) */}
+    <div className="w-full flex flex-col lg:flex-row gap-6 text-left relative min-h-[520px]">
+      {/* Sidebar Mock */}
       <div className="hidden lg:flex w-64 flex-col gap-6 p-6 bg-bg-card border border-border rounded-[24px]">
         <div className="flex items-center gap-3 px-2">
           <div className="w-8 h-8 bg-primary rounded-[10px] flex items-center justify-center">
@@ -73,18 +95,27 @@ export default function DashboardPreview() {
         </div>
         
         <div className="space-y-1">
-          <div className="flex items-center gap-3 px-3 py-2 bg-primary/5 text-primary rounded-xl font-semibold text-sm cursor-pointer">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+          <button 
+            onClick={() => setActiveTab("dashboard")}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${activeTab === 'dashboard' ? 'bg-primary/5 text-primary' : 'text-text-muted hover:bg-bg hover:text-text'}`}
+          >
+            <div className={`w-1.5 h-1.5 rounded-full ${activeTab === 'dashboard' ? 'bg-primary' : 'bg-transparent'}`} />
             Dashboard
-          </div>
-          <div className="flex items-center gap-3 px-3 py-2 text-text-muted hover:bg-bg rounded-xl text-sm font-medium transition-colors cursor-pointer">
-            <div className="w-1.5 h-1.5 rounded-full bg-transparent" />
+          </button>
+          <button 
+            onClick={() => setActiveTab("parses")}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${activeTab === 'parses' ? 'bg-primary/5 text-primary' : 'text-text-muted hover:bg-bg hover:text-text'}`}
+          >
+            <div className={`w-1.5 h-1.5 rounded-full ${activeTab === 'parses' ? 'bg-primary' : 'bg-transparent'}`} />
             Parses
-          </div>
-          <div className="flex items-center gap-3 px-3 py-2 text-text-muted hover:bg-bg rounded-xl text-sm font-medium transition-colors cursor-pointer">
-            <div className="w-1.5 h-1.5 rounded-full bg-transparent" />
+          </button>
+          <button 
+            onClick={() => setActiveTab("connected")}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${activeTab === 'connected' ? 'bg-primary/5 text-primary' : 'text-text-muted hover:bg-bg hover:text-text'}`}
+          >
+            <div className={`w-1.5 h-1.5 rounded-full ${activeTab === 'connected' ? 'bg-primary' : 'bg-transparent'}`} />
             Connected
-          </div>
+          </button>
         </div>
 
         <button 
@@ -98,149 +129,241 @@ export default function DashboardPreview() {
 
       {/* Main Content */}
       <div className="flex-1 space-y-6">
-        {/* Calendar View Mock */}
-        <div className="bg-bg-card border border-border rounded-[24px] overflow-hidden shadow-sm relative">
-          <div className="flex items-center justify-between p-5 border-b border-border">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-[12px] flex items-center justify-center">
-                <CalendarIcon className="w-5 h-5 text-primary" />
+        {activeTab === "dashboard" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            {/* Calendar View Mock */}
+            <div className="bg-bg-card border border-border rounded-[24px] overflow-hidden shadow-sm relative">
+              <div className="flex items-center justify-between p-5 border-b border-border">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-[12px] flex items-center justify-center">
+                    <CalendarIcon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-text transition-all">{monthName} {year}</h3>
+                    <p className="text-[10px] text-primary font-bold flex items-center gap-1 uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                      Viewing Google Calendar
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-border/20 p-1 rounded-xl">
+                    <button onClick={goToday} className="p-1 px-3 border border-border bg-white rounded-[8px] text-[10px] font-bold shadow-sm hover:bg-bg transition-colors active:scale-95">Today</button>
+                    <button onClick={prevMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronLeft className="w-3 h-3" /></button>
+                    <button onClick={nextMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronRight className="w-3 h-3" /></button>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-text transition-all">{monthName} {year}</h3>
-                <p className="text-[10px] text-primary font-bold flex items-center gap-1 uppercase tracking-wider">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                  Viewing Google Calendar
-                </p>
+
+              <div className="grid grid-cols-7 border-b border-border bg-bg/30">
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                  <div key={d} className="py-2 text-center text-[9px] font-bold uppercase tracking-wider text-text-muted border-r border-border/20 last:border-0">
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-7">
+                {Array.from({ length: 35 }).map((_, i) => {
+                  const startDayOffset = new Date(year, month, 1).getDay();
+                  const day = i - startDayOffset + 1;
+                  const daysInMonth = new Date(year, month + 1, 0).getDate();
+                  const isCurrentMonth = day > 0 && day <= daysInMonth;
+                  const hasEvents = isCurrentMonth && month === 3 && [13, 14, 15, 16, 17].includes(day);
+                  const isToday = day === 6 && month === 3;
+
+                  return (
+                    <div key={i} className={`h-[80px] border-b border-r border-border/20 p-1 relative transition-all duration-300 hover:bg-primary/[0.02] ${isCurrentMonth ? '' : 'bg-bg/20 opacity-40'} ${isToday ? 'bg-primary/[0.04]' : ''}`}>
+                      {isCurrentMonth && (
+                        <span className={`text-[10px] font-bold inline-flex items-center justify-center w-5 h-5 rounded-full transition-all ${isToday ? 'bg-primary text-white shadow-md scale-110' : 'text-text-muted'}`}>
+                          {day}
+                        </span>
+                      )}
+                      {hasEvents && (
+                        <div className="mt-1 space-y-0.5">
+                          <button 
+                            onClick={() => setSelectedEvent(MOCK_EVENTS.find(e => new Date(e.start).getDate() === day) || null)}
+                            className="w-full text-left bg-primary/10 text-primary text-[8px] font-bold px-1.5 py-1 rounded-md truncate border border-primary/10 hover:bg-primary/20 transition-all active:scale-95"
+                          >
+                            {MOCK_EVENTS.find(e => new Date(e.start).getDate() === day)?.title}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {selectedEvent && (
+                <div className="absolute bottom-4 left-4 right-4 bg-bg-card border border-primary/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-bottom-4 transition-all z-20">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      <h4 className="text-sm font-bold text-text">{selectedEvent.title}</h4>
+                    </div>
+                    <button onClick={() => setSelectedEvent(null)}>
+                      <X className="w-4 h-4 text-text-muted hover:text-text" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
+                    <span className="flex items-center gap-1.5 italic">
+                      <CalendarIcon className="w-3 h-3" />
+                      {new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="font-bold text-primary">@</span>
+                      {selectedEvent.location}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Recent Parses Mock Overlay */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-text flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-primary rounded-full" />
+                  Recent Parses
+                </h3>
+                <div className="flex items-center gap-2">
+                   <div className="flex items-center gap-1 bg-bg border border-border p-0.5 rounded-xl shadow-inner">
+                     <button 
+                      onClick={() => setFilter("all")}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "all" ? 'bg-white shadow-sm border border-border text-primary' : 'text-text-muted hover:text-text'}`}
+                     >
+                       All
+                     </button>
+                     <button 
+                      onClick={() => setFilter("draft")}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "draft" ? 'bg-white shadow-sm border border-border text-warning' : 'text-text-muted hover:text-text'}`}
+                     >
+                       Draft
+                     </button>
+                   </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {filteredSessions.map((s) => (
+                  <div key={s.id} className="group bg-bg-card border border-border hover:border-primary hover:shadow-md hover:-translate-y-0.5 transition-all rounded-[18px] p-4 flex items-center gap-4 cursor-pointer">
+                    <div className="w-11 h-11 bg-bg rounded-xl flex items-center justify-center border border-border group-hover:bg-primary/5 transition-colors">
+                      {s.input_type === 'pdf' ? <FileText className="w-5 h-5 text-text-muted" /> : <Type className="w-5 h-5 text-text-muted" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold text-text truncate group-hover:text-primary transition-colors">{s.title}</span>
+                        <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-md uppercase tracking-widest ${s.status === 'pushed' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
+                          {s.status}
+                        </span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-3.5 h-3.5 text-text-light group-hover:translate-x-1 group-hover:text-primary transition-all" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "parses" && (
+          <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-text">Dossier: All Parses</h3>
+              <div className="flex items-center gap-2">
+                <Search className="w-4 h-4 text-text-light" />
+                <div className="w-32 bg-bg border border-border rounded-lg h-8" />
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-border/20 p-1 rounded-xl">
-                 <button onClick={goToday} className="p-1 px-3 border border-border bg-white rounded-[8px] text-[10px] font-bold shadow-sm hover:bg-bg transition-colors active:scale-95">Today</button>
-                 <button onClick={prevMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronLeft className="w-3 h-3" /></button>
-                 <button onClick={nextMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronRight className="w-3 h-3" /></button>
-              </div>
+            <div className="bg-bg-card border border-border rounded-[24px] overflow-hidden">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-bg/40 border-b border-border">
+                  <tr>
+                    <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Session</th>
+                    <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Events</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {MOCK_SESSIONS.map((s) => (
+                    <tr key={s.id} className="hover:bg-bg/20 transition-colors cursor-pointer group">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                           {s.input_type === 'pdf' ? <FileText className="w-4 h-4 text-text-muted" /> : <Type className="w-4 h-4 text-text-muted" />}
+                           <span className="font-semibold group-hover:text-primary transition-colors">{s.title}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-[9px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${s.status === 'pushed' ? 'bg-success/10 text-success' : s.status === 'failed' ? 'bg-error/10 text-error' : 'bg-warning/10 text-warning'}`}>
+                          {s.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-text-muted text-xs font-medium">{s.date}</td>
+                      <td className="px-6 py-4 text-text-muted text-xs font-bold">{s.event_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
+        )}
 
-          <div className="grid grid-cols-7 border-b border-border bg-bg/30">
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-              <div key={d} className="py-2 text-center text-[9px] font-bold uppercase tracking-wider text-text-muted border-r border-border/20 last:border-0">
-                {d}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7">
-            {Array.from({ length: 35 }).map((_, i) => {
-              const startDayOffset = new Date(year, month, 1).getDay();
-              const day = i - startDayOffset + 1;
-              const daysInMonth = new Date(year, month + 1, 0).getDate();
-              const isCurrentMonth = day > 0 && day <= daysInMonth;
-              const hasEvents = isCurrentMonth && month === 3 && [13, 14, 15, 16, 17].includes(day);
-              const isToday = day === 6 && month === 3; // Mock "today" as April 6
-
-              return (
-                <div key={i} className={`h-[80px] border-b border-r border-border/20 p-1 relative transition-all duration-300 hover:bg-primary/[0.02] ${isCurrentMonth ? '' : 'bg-bg/20 opacity-40'} ${isToday ? 'bg-primary/[0.04]' : ''}`}>
-                  {isCurrentMonth && (
-                    <span className={`text-[10px] font-bold inline-flex items-center justify-center w-5 h-5 rounded-full transition-all ${isToday ? 'bg-primary text-white shadow-md scale-110' : 'text-text-muted'}`}>
-                      {day}
-                    </span>
-                  )}
-                  {hasEvents && (
-                    <div className="mt-1 space-y-0.5">
-                      <button 
-                        onClick={() => setSelectedEvent(MOCK_EVENTS.find(e => new Date(e.start).getDate() === day) || null)}
-                        className="w-full text-left bg-primary/10 text-primary text-[8px] font-bold px-1.5 py-1 rounded-md truncate border border-primary/10 hover:bg-primary/20 transition-all active:scale-95"
-                      >
-                        {MOCK_EVENTS.find(e => new Date(e.start).getDate() === day)?.title}
-                      </button>
-                    </div>
-                  )}
+        {activeTab === "connected" && (
+          <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <h3 className="text-lg font-bold text-text">Calendar Nodes</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-bg-card border border-primary/20 rounded-[24px] p-6 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4">
+                   <div className="flex items-center gap-2 bg-success/10 text-success px-3 py-1 rounded-full text-[10px] font-bold">
+                     <CheckCircle2 className="w-3 h-3" />
+                     ACTIVE
+                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Event Details Toast/Modal Simulation */}
-          {selectedEvent && (
-            <div className="absolute bottom-4 left-4 right-4 bg-bg-card border border-primary/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-bottom-4 transition-all z-20">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary" />
-                  <h4 className="text-sm font-bold text-text">{selectedEvent.title}</h4>
+                <div className="w-12 h-12 bg-[#1a73e8]/10 rounded-2xl flex items-center justify-center mb-4">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                  </svg>
                 </div>
-                <button onClick={() => setSelectedEvent(null)}>
-                  <X className="w-4 h-4 text-text-muted hover:text-text" />
-                </button>
+                <h4 className="font-bold text-text mb-1">Google Calendar</h4>
+                <p className="text-xs text-text-muted mb-4">sagar@example.com</p>
+                <button className="text-[11px] font-bold text-error border border-error/20 px-4 py-2 rounded-xl hover:bg-error/5 transition-colors">Disconnect</button>
               </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
-                <span className="flex items-center gap-1.5 italic">
-                  <CalendarIcon className="w-3 h-3" />
-                  {new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="font-bold text-primary">@</span>
-                  {selectedEvent.location}
-                </span>
+
+              <div className="bg-bg-card border border-border border-dashed rounded-[24px] p-6 flex flex-col items-center justify-center text-center opacity-60">
+                 <div className="w-12 h-12 bg-bg rounded-2xl flex items-center justify-center mb-4">
+                    <Globe className="w-6 h-6 text-text-light" />
+                 </div>
+                 <h4 className="font-bold text-text mb-1">Outlook Calendar</h4>
+                 <p className="text-xs text-text-muted mb-4">Connect your Microsoft account</p>
+                 <button className="text-[11px] font-bold bg-bg border border-border px-4 py-2 rounded-xl hover:bg-bg-card transition-all">Link Calendar</button>
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Recent Parses Mock */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-text flex items-center gap-2">
-              <span className="w-1.5 h-4 bg-primary rounded-full" />
-              Recent Parses
-            </h3>
-            <div className="flex items-center gap-2">
-               <div className="flex items-center gap-1 bg-bg border border-border p-0.5 rounded-xl shadow-inner">
-                 <button 
-                  onClick={() => setFilter("all")}
-                  className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "all" ? 'bg-white shadow-sm border border-border text-primary' : 'text-text-muted hover:text-text'}`}
-                 >
-                   All
-                 </button>
-                 <button 
-                  onClick={() => setFilter("draft")}
-                  className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "draft" ? 'bg-white shadow-sm border border-border text-warning' : 'text-text-muted hover:text-text'}`}
-                 >
-                   Draft
-                 </button>
-               </div>
-               <div className="relative group">
-                 <Search className="w-3 h-3 absolute left-2.5 top-1/2 -translate-y-1/2 text-text-light group-focus-within:text-primary transition-colors" />
-                 <input 
-                  disabled
-                  placeholder="Search..."
-                  className="w-32 bg-bg border border-border rounded-xl h-8 pl-8 text-[10px] focus:outline-none focus:border-primary transition-all cursor-not-allowed" 
-                 />
-               </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 transition-all duration-500">
-            {filteredSessions.map((s) => (
-              <div key={s.id} className="group bg-bg-card border border-border hover:border-primary hover:shadow-md hover:-translate-y-0.5 transition-all rounded-[18px] p-4 flex items-center gap-4 cursor-pointer">
-                <div className="w-11 h-11 bg-bg rounded-xl flex items-center justify-center border border-border group-hover:bg-primary/5 transition-colors">
-                  {s.input_type === 'pdf' ? <FileText className="w-5 h-5 text-text-muted" /> : <Type className="w-5 h-5 text-text-muted" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-text truncate group-hover:text-primary transition-colors">{s.title}</span>
-                    <span className={`text-[8px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-widest ${s.status === 'pushed' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-                      {s.status}
-                    </span>
+            
+            <div className="p-6 bg-bg border border-border rounded-[24px]">
+               <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-cta/10 rounded-xl flex items-center justify-center text-cta">
+                    <Settings className="w-5 h-5" />
                   </div>
-                  <p className="text-[10px] text-text-muted mt-1 uppercase font-semibold tracking-tight">{s.event_count} events extracted</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-text-light transform group-hover:translate-x-1 group-hover:text-primary transition-all" />
-              </div>
-            ))}
+                  <div>
+                    <h4 className="font-bold text-text text-sm">Global Push Sync</h4>
+                    <p className="text-[10px] text-text-muted">Automatically sync changes back to original files</p>
+                  </div>
+               </div>
+               <div className="flex items-center justify-between text-xs font-semibold px-2">
+                 <span>Auto-Push New Parses</span>
+                 <div className="w-10 h-5 bg-primary rounded-full relative">
+                    <div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full shadow-sm" />
+                 </div>
+               </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Mock "New Parse" Modal */}
