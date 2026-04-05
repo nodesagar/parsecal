@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Zap,
 } from "lucide-react";
+import DashboardPreview from "@/components/landing/dashboard-preview";
 
 export default function LandingPage() {
   return (
@@ -72,13 +73,11 @@ export default function LandingPage() {
       {/* Dashboard Preview */}
       <section className="pb-20 px-6 max-w-6xl mx-auto">
         <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-cta rounded-[24px] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-          <div className="relative bg-bg-card border border-border rounded-[20px] overflow-hidden shadow-2xl">
-            <img
-              src="/readme/hero.png"
-              alt="ParseCal Dashboard"
-              className="w-full h-auto object-cover"
-            />
+          <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 via-cta/20 to-primary/20 rounded-[32px] blur-xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-bg/50 backdrop-blur-3xl border border-white/20 p-2 md:p-4 rounded-[28px] overflow-hidden shadow-2xl">
+             <div className="bg-bg rounded-[20px] p-2 md:p-6 min-h-[400px] flex items-center justify-center overflow-hidden">
+                <DashboardPreview />
+             </div>
           </div>
         </div>
       </section>
