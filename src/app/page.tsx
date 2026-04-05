@@ -376,9 +376,22 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-border/50 gap-4">
-            <p className="text-[11px] font-black text-text-light uppercase tracking-widest">
+            <p className="text-[11px] font-black text-text-light uppercase tracking-widest leading-relaxed">
               © {new Date().getFullYear()} ParseCal. Engineered for clarity.
             </p>
+            <a 
+              href="https://github.com/nodesagar" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="group flex items-center gap-2"
+            >
+              <span className="text-[10px] font-black text-text-light uppercase tracking-tighter italic opacity-50 group-hover:opacity-100 transition-opacity">
+                Curated by
+              </span>
+              <span className="text-[10px] font-black text-text uppercase tracking-widest border-b-2 border-primary/20 group-hover:border-primary transition-all">
+                nodesagar
+              </span>
+            </a>
           </div>
         </div>
       </footer>
