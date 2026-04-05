@@ -82,37 +82,51 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Input Types */}
-      <section className="pb-20 px-6 max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Input Types - Dossier Style */}
+      <section className="pb-32 px-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
               icon: Image,
-              title: "Images & Photos",
-              desc: "Screenshots, whiteboard photos, handwritten notes — even messy ones.",
+              title: "Visual Extracts",
+              desc: "Screenshots, whiteboard captures, and handwritten schedules. Our OCR handles the noise.",
+              label: "IMG / PNG / JPG",
+              color: "text-blue-500",
+              bgColor: "bg-blue-500/10",
             },
             {
               icon: FileText,
-              title: "PDF Documents",
-              desc: "Conference agendas, class syllabi, travel itineraries.",
+              title: "Document Parses",
+              desc: "Formal agendas, syllabi, and multi-page itineraries. Deep structure extraction, instantly.",
+              label: "PDF / DOCX",
+              color: "text-purple-500",
+              bgColor: "bg-purple-500/10",
             },
             {
               icon: Type,
-              title: "Plain Text",
-              desc: "Paste text from emails, group chats, or any message.",
+              title: "Raw Context",
+              desc: "Paste unstructured text from emails, group chats, or meeting transcripts.",
+              label: "STRING / TEXT",
+              color: "text-emerald-500",
+              bgColor: "bg-emerald-500/10",
             },
           ].map((item) => (
             <div
               key={item.title}
-              className="bg-bg-card border border-border rounded-[16px] p-6 text-center hover:border-primary cursor-pointer"
+              className="group relative bg-bg-card border border-border rounded-[24px] p-8 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 overflow-hidden"
             >
-              <div className="w-12 h-12 bg-primary/10 rounded-[10px] flex items-center justify-center mx-auto mb-4">
-                <item.icon className="w-6 h-6 text-primary" />
+              <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <span className={`text-[10px] font-bold px-2 py-1 rounded-md border border-current ${item.color} uppercase tracking-tighter`}>
+                  {item.label}
+                </span>
               </div>
-              <h3 className="text-lg font-semibold text-text mb-2">
+              <div className={`w-14 h-14 ${item.bgColor} rounded-[18px] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500`}>
+                <item.icon className={`w-7 h-7 ${item.color}`} />
+              </div>
+              <h3 className="text-xl font-bold text-text mb-3 tracking-tight">
                 {item.title}
               </h3>
-              <p className="text-sm text-text-muted leading-relaxed">
+              <p className="text-sm text-text-muted leading-relaxed font-medium">
                 {item.desc}
               </p>
             </div>
@@ -120,46 +134,74 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="pb-20 px-6 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-text text-center mb-12">
-          Three steps. Zero manual work.
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              step: "1",
-              color: "bg-primary",
-              title: "Upload",
-              desc: "Drop a file, take a photo, or paste text with schedule info.",
-            },
-            {
-              step: "2",
-              color: "bg-warning",
-              title: "Review",
-              desc: "AI extracts events. Review, edit, and confirm the draft.",
-            },
-            {
-              step: "3",
-              color: "bg-success",
-              title: "Push",
-              desc: "One click — events land in your Google or Outlook calendar.",
-            },
-          ].map((item) => (
-            <div key={item.step} className="text-center">
-              <div
-                className={`w-10 h-10 ${item.color} text-white font-bold rounded-full flex items-center justify-center mx-auto mb-4 text-lg`}
-              >
-                {item.step}
+      {/* How It Works - Operational Protocol */}
+      <section id="how-it-works" className="pb-32 px-6 max-w-6xl mx-auto border-t border-border/50 pt-32">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl font-extrabold text-text tracking-tight mb-4">
+            Zero friction, autonomous extraction.
+          </h2>
+          <p className="text-text-muted font-medium max-w-lg mx-auto">
+            The ParseCal protocol automates the entire lifecycle of event creation.
+          </p>
+        </div>
+
+        <div className="relative">
+          {/* Connecting Line (Desktop) */}
+          <div className="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-primary/0 via-border to-primary/0" />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
+            {[
+              {
+                step: "01",
+                phase: "EXTRACTION",
+                title: "Initialize Source",
+                desc: "Drop any unstructured data source into the engine. AI begins pattern recognition.",
+                icon: Zap,
+                color: "text-primary",
+                borderColor: "border-primary/20",
+                shadow: "shadow-primary/5",
+              },
+              {
+                step: "02",
+                phase: "VALIDATION",
+                title: "AI Analysis",
+                desc: "Events are serialized with confidence scores. Review the extraction for total accuracy.",
+                icon: Sparkles,
+                color: "text-warning",
+                borderColor: "border-warning/20",
+                shadow: "shadow-warning/5",
+              },
+              {
+                step: "03",
+                phase: "DEPLOYMENT",
+                title: "Push to Node",
+                desc: "One click pushes verified events to your connected cloud calendar nodes.",
+                icon: CheckCircle2,
+                color: "text-success",
+                borderColor: "border-success/20",
+                shadow: "shadow-success/5",
+              },
+            ].map((item) => (
+              <div key={item.step} className="flex flex-col items-center md:items-start text-center md:text-left group">
+                <div className={`relative w-24 h-24 bg-bg-card border-2 ${item.borderColor} rounded-[32px] flex items-center justify-center mb-8 ${item.shadow} shadow-xl group-hover:-rotate-3 transition-all duration-500`}>
+                   <div className="absolute -top-3 -right-3 bg-white border border-border px-2 py-1 rounded-lg text-[10px] font-black text-text shadow-sm">
+                      {item.step}
+                   </div>
+                   <item.icon className={`w-10 h-10 ${item.color}`} />
+                </div>
+                <div className={`text-[10px] font-black ${item.color} uppercase tracking-[0.25em] mb-3 flex items-center gap-2`}>
+                   <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                   {item.phase}
+                </div>
+                <h3 className="text-2xl font-bold text-text mb-4 tracking-tight group-hover:translate-x-1 transition-transform">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-text-muted leading-relaxed font-semibold max-w-[280px]">
+                  {item.desc}
+                </p>
               </div>
-              <h3 className="text-lg font-semibold text-text mb-2">
-                {item.title}
-              </h3>
-              <p className="text-sm text-text-muted leading-relaxed">
-                {item.desc}
-              </p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
