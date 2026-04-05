@@ -319,23 +319,56 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Intelligence Nodes Area - Replacing Product & Resources */}
+            {/* System Architecture & Live Operations - Replacing Intelligence Nodes */}
             <div className="col-span-1 md:col-span-2 lg:col-span-2">
-              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-8">Intelligence Nodes</h4>
-              <div className="grid grid-cols-2 gap-4">
-                 {[
-                   { name: "Gemini Pro", status: "READY", color: "text-blue-500", bg: "bg-blue-500/10" },
-                   { name: "GPT-4o Engine", status: "ACTIVE", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                   { name: "Claude 3.5", status: "READY", color: "text-purple-500", bg: "bg-purple-500/10" },
-                   { name: "Sync Protocol", status: "ACTIVE", color: "text-primary", bg: "bg-primary/10" },
-                 ].map((node) => (
-                   <div key={node.name} className="flex items-center justify-between p-3 bg-bg border border-border rounded-xl">
-                      <span className="text-xs font-bold text-text">{node.name}</span>
-                      <span className={`text-[9px] font-black ${node.bg} ${node.color} px-2 py-0.5 rounded-md`}>
-                        {node.status}
-                      </span>
+              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                Live Architecture & Ops
+              </h4>
+              <div className="bg-bg border border-border rounded-2xl p-4 overflow-hidden relative group">
+                {/* Architecture Flow SVG */}
+                <div className="flex items-center justify-between gap-4 mb-4 border-b border-border pb-4">
+                   <div className="flex flex-col items-center gap-1">
+                      <div className="w-8 h-8 rounded-lg bg-bg-card border border-border flex items-center justify-center">
+                         <FileText className="w-4 h-4 text-text-muted" />
+                      </div>
+                      <span className="text-[8px] font-black text-text-muted uppercase">Source</span>
                    </div>
-                 ))}
+                   <div className="flex-1 h-[1px] bg-gradient-to-r from-border via-primary/50 to-border relative">
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-bg border border-primary flex items-center justify-center">
+                         <Sparkles className="w-2 h-2 text-primary" />
+                      </div>
+                   </div>
+                   <div className="flex flex-col items-center gap-1">
+                      <div className="w-8 h-8 rounded-lg bg-bg-card border border-border flex items-center justify-center">
+                         <Calendar className="w-4 h-4 text-text-muted" />
+                      </div>
+                      <span className="text-[8px] font-black text-text-muted uppercase">Sink</span>
+                   </div>
+                </div>
+
+                {/* Operations Stream */}
+                <div className="space-y-2 font-mono text-[9px] leading-tight">
+                   {[
+                     { op: "EXTRACT", src: "agenda_2025.pdf", out: "14 Events", conf: "98.2%" },
+                     { op: "VALIDATE", src: "text_snippet_01", out: "3 Events", conf: "99.1%" },
+                     { op: "SYNC", src: "img_capture_33", out: "8 Events", conf: "97.5%" },
+                   ].map((log, i) => (
+                     <div key={i} className="flex items-center justify-between text-text-muted group-hover:text-text transition-colors">
+                        <div className="flex items-center gap-2">
+                           <span className="text-primary font-bold">[{log.op}]</span>
+                           <span className="opacity-50 truncate max-w-[80px]">{log.src}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                           <span>{log.out}</span>
+                           <span className="text-success font-bold">{log.conf}</span>
+                        </div>
+                     </div>
+                   ))}
+                </div>
+                
+                {/* Decorative Terminal Scanline */}
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
 
