@@ -321,10 +321,6 @@ export default function LandingPage() {
 
             {/* Live History & System Ops */}
             <div className="col-span-1 md:col-span-2 lg:col-span-2">
-              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                Live Status & Activity
-              </h4>
               <div className="bg-bg border border-border rounded-2xl p-4 overflow-hidden relative group">
                 {/* Visual Flow */}
                 <div className="flex items-center justify-between gap-4 mb-4 border-b border-border pb-4">
