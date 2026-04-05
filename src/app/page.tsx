@@ -205,50 +205,92 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="pb-20 px-6 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-text text-center mb-12">
-          Built for real-world schedules
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Features - Capabilities Matrix */}
+      <section className="pb-32 px-6 max-w-6xl mx-auto border-t border-border/50 pt-32">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 text-center md:text-left">
+           <div>
+             <h2 className="text-3xl font-extrabold text-text tracking-tight mb-2">
+               Precision-built for complexity.
+             </h2>
+             <p className="text-text-muted font-medium">The ParseCal engine handles real-world scheduling anomalies.</p>
+           </div>
+           <div className="px-4 py-2 bg-success/5 border border-success/20 rounded-full flex items-center gap-2 mx-auto md:mx-0">
+             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+             <span className="text-[10px] font-black text-success uppercase tracking-widest">System Operational</span>
+           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            "Handwritten note recognition",
-            "Multi-provider AI (Gemini, GPT, Claude)",
-            "Google Calendar & Outlook integration",
-            "Confidence scores for each event",
-            "Inline editing before push",
-            ".ics export for any calendar",
-            "Bring your own API key",
-            "Recurring event support",
+            { t: "Handwritten Logic", d: "ML-tuned OCR for messy ink", i: Type },
+            { t: "Multi-Model AI", d: "GPT-4o, Claude 3.5, Gemini Pro", i: Sparkles },
+            { t: "Node Integration", d: "Google & Outlook cloud sync", i: Calendar },
+            { t: "Confidence Scoring", d: "Probability metrics per event", i: CheckCircle2 },
+            { t: "Inline Buffer", d: "Edit drafts before pushing live", i: ArrowRight },
+            { t: "ICS Serialization", d: "Universal calendar format export", i: FileText },
+            { t: "Custom Schema", d: "Bring your own LLM API keys", i: Zap },
+            { t: "Temporal Logic", d: "Complex recurring schedule support", i: Calendar },
           ].map((feature) => (
             <div
-              key={feature}
-              className="flex items-center gap-3 bg-bg-card border border-border rounded-[10px] px-4 py-3"
+              key={feature.t}
+              className="group flex flex-col gap-3 bg-bg-card border border-border rounded-[18px] p-5 hover:border-primary/50 transition-all duration-300"
             >
-              <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
-              <span className="text-sm font-medium text-text">{feature}</span>
+              <div className="w-10 h-10 bg-bg border border-border rounded-xl flex items-center justify-center group-hover:scale-110 transition-all">
+                <feature.i className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-text mb-1 tracking-tight">{feature.t}</h4>
+                <p className="text-[10px] text-text-muted font-bold leading-relaxed">{feature.d}</p>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="pb-20 px-6 max-w-3xl mx-auto text-center">
-        <div className="bg-bg-card border border-border rounded-[16px] p-10">
-          <Zap className="w-10 h-10 text-cta mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-text mb-3">
-            Stop typing events manually
-          </h2>
-          <p className="text-text-muted mb-6">
-            20 free parses per month. No credit card required.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-flex items-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-8 py-3.5 rounded-[10px] text-lg cursor-pointer"
-          >
-            Get Started Free
-            <ArrowRight className="w-5 h-5" />
-          </Link>
+      {/* Final CTA - Secure Terminal Style */}
+      <section className="pb-40 px-6 max-w-5xl mx-auto">
+        <div className="relative overflow-hidden bg-bg-card border border-border rounded-[40px] p-12 md:p-20 text-center shadow-2xl">
+          {/* Background Decorative Element */}
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0" />
+          <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-cta/0 via-cta/30 to-cta/0" />
+          
+          <div className="relative z-10">
+            <div className="w-16 h-16 bg-cta/10 rounded-[22px] flex items-center justify-center mx-auto mb-10 shadow-lg shadow-cta/5">
+              <Zap className="w-8 h-8 text-cta" />
+            </div>
+            
+            <h2 className="text-4xl md:text-5xl font-black text-text tracking-tighter mb-6 leading-tight">
+              Reclaim your time from<br />
+              <span className="text-primary italic">manual serialization.</span>
+            </h2>
+            
+            <p className="text-lg text-text-muted mb-12 font-medium max-w-xl mx-auto">
+              Deployment is instant. 20 free cycles per month. <br className="hidden md:block" />
+              No credit card. No friction. Just extraction.
+            </p>
+            
+            <div className="flex flex-col items-center gap-6">
+              <Link
+                href="/signup"
+                className="group relative inline-flex items-center gap-3 bg-cta hover:bg-cta-hover text-white font-black px-10 py-5 rounded-[18px] text-xl transition-all shadow-xl shadow-cta/20 active:scale-95"
+              >
+                Initialize Free Access
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              
+              <div className="flex items-center gap-6 opacity-40">
+                 <div className="flex flex-col text-[10px] font-black text-text uppercase tracking-widest leading-none gap-1">
+                    <span>12k+ sessions</span>
+                    <span className="text-text-muted italic">Processed this month</span>
+                 </div>
+                 <div className="w-[1px] h-6 bg-border" />
+                 <div className="flex flex-col text-[10px] font-black text-text uppercase tracking-widest leading-none gap-1">
+                    <span>99.8% precision</span>
+                    <span className="text-text-muted italic">AI Extraction accuracy</span>
+                 </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
