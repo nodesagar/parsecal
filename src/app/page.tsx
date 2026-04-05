@@ -69,6 +69,20 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Dashboard Preview */}
+      <section className="pb-20 px-6 max-w-6xl mx-auto">
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-cta rounded-[24px] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative bg-bg-card border border-border rounded-[20px] overflow-hidden shadow-2xl">
+            <img
+              src="/readme/hero.png"
+              alt="ParseCal Dashboard"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Input Types */}
       <section className="pb-20 px-6 max-w-4xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
