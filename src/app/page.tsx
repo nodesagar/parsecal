@@ -383,7 +383,7 @@ export default function LandingPage() {
               href="https://github.com/nodesagar" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center gap-4 py-2 px-4 rounded-xl hover:bg-white transition-all duration-500 shadow-sm hover:shadow-md border border-transparent hover:border-border active:scale-95"
+              className="group flex items-center gap-3 transition-all active:scale-95 py-1"
             >
               <span className="font-manrope text-[10px] font-bold text-text-light uppercase tracking-[0.2em] flex items-center gap-2">
                 Built with <span className="text-sm group-hover:animate-bounce transition-all duration-300">❤️</span> and <span className="text-xl">☕</span> by
