@@ -377,11 +377,6 @@ export default function LandingPage() {
             <p className="text-[11px] font-black text-text-light uppercase tracking-widest">
               © {new Date().getFullYear()} ParseCal. Engineered for clarity.
             </p>
-            <div className="flex items-center gap-6">
-              <span className="text-[10px] font-black text-text-light uppercase tracking-tighter italic opacity-50 underline decoration-primary decoration-2 underline-offset-4">
-                Powered by Advanced AI Nodes
-              </span>
-            </div>
           </div>
         </div>
       </footer>
