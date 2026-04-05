@@ -18,7 +18,7 @@ export default function LandingPage() {
       <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[16px] px-6 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <Calendar className="w-6 h-6 text-primary" />
-          <span className="text-lg font-bold text-text">ParseCal</span>
+          <span className="text-xl font-bold text-text">ParseCal</span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
@@ -40,7 +40,7 @@ export default function LandingPage() {
       <section className="pt-32 pb-20 px-6 max-w-5xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-medium px-4 py-1.5 rounded-full mb-6">
           <Sparkles className="w-4 h-4" />
-          AI-Powered Calendar Management
+          AI-Powered Schedule Scanner
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold text-text leading-tight mb-6">
           Turn any schedule into{" "}
@@ -88,25 +88,25 @@ export default function LandingPage() {
           {[
             {
               icon: Image,
-              title: "Visual Extracts",
-              desc: "Screenshots, whiteboard captures, and handwritten schedules. Our OCR handles the noise.",
-              label: "IMG / PNG / JPG",
+              title: "Photos & Notes",
+              desc: "Snap a photo of your schedule or whiteboard. Our AI handles the handwriting.",
+              label: "IMAGE",
               color: "text-blue-500",
               bgColor: "bg-blue-500/10",
             },
             {
               icon: FileText,
-              title: "Document Parses",
-              desc: "Formal agendas, syllabi, and multi-page itineraries. Deep structure extraction, instantly.",
-              label: "PDF / DOCX",
+              title: "Files & Documents",
+              desc: "Upload PDFs, syllabi, and multi-page itineraries. We extract every event.",
+              label: "DOCS",
               color: "text-purple-500",
               bgColor: "bg-purple-500/10",
             },
             {
               icon: Type,
-              title: "Raw Context",
-              desc: "Paste unstructured text from emails, group chats, or meeting transcripts.",
-              label: "STRING / TEXT",
+              title: "Copied Text",
+              desc: "Paste text directly from emails, group chats, or any messy source.",
+              label: "TEXT",
               color: "text-emerald-500",
               bgColor: "bg-emerald-500/10",
             },
@@ -138,10 +138,10 @@ export default function LandingPage() {
       <section id="how-it-works" className="pb-32 px-6 max-w-6xl mx-auto border-t border-border/50 pt-32">
         <div className="text-center mb-20">
           <h2 className="text-4xl font-extrabold text-text tracking-tight mb-4">
-            Zero friction, autonomous extraction.
+            Upload once. Done in seconds.
           </h2>
           <p className="text-text-muted font-medium max-w-lg mx-auto">
-            The ParseCal protocol automates the entire lifecycle of event creation.
+            ParseCal automates the entire process of scanning and creating events.
           </p>
         </div>
 
@@ -152,30 +152,30 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
             {[
               {
-                step: "01",
-                phase: "EXTRACTION",
-                title: "Initialize Source",
-                desc: "Drop any unstructured data source into the engine. AI begins pattern recognition.",
+                step: "1",
+                phase: "READING",
+                title: "Upload Schedule",
+                desc: "Drop any file or paste any text. Our AI reads the details instantly.",
                 icon: Zap,
                 color: "text-primary",
                 borderColor: "border-primary/20",
                 shadow: "shadow-primary/5",
               },
               {
-                step: "02",
-                phase: "VALIDATION",
-                title: "AI Analysis",
-                desc: "Events are serialized with confidence scores. Review the extraction for total accuracy.",
+                step: "2",
+                phase: "REVIEWING",
+                title: "Smart Extraction",
+                desc: "We find every date and time. Review the events and make any quick edits.",
                 icon: Sparkles,
                 color: "text-warning",
                 borderColor: "border-warning/20",
                 shadow: "shadow-warning/5",
               },
               {
-                step: "03",
-                phase: "DEPLOYMENT",
-                title: "Push to Node",
-                desc: "One click pushes verified events to your connected cloud calendar nodes.",
+                step: "3",
+                phase: "SYNCING",
+                title: "Push to Calendar",
+                desc: "One click sends everything to your Google or Outlook calendar.",
                 icon: CheckCircle2,
                 color: "text-success",
                 borderColor: "border-success/20",
@@ -210,26 +210,26 @@ export default function LandingPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 text-center md:text-left">
            <div>
              <h2 className="text-3xl font-extrabold text-text tracking-tight mb-2">
-               Precision-built for complexity.
+               Built for messy reality.
              </h2>
-             <p className="text-text-muted font-medium">The ParseCal engine handles real-world scheduling anomalies.</p>
+             <p className="text-text-muted font-medium">Everything you need to stop typing events manually.</p>
            </div>
            <div className="px-4 py-2 bg-success/5 border border-success/20 rounded-full flex items-center gap-2 mx-auto md:mx-0">
              <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-             <span className="text-[10px] font-black text-success uppercase tracking-widest">System Operational</span>
+             <span className="text-[10px] font-black text-success uppercase tracking-widest">System Active</span>
            </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { t: "Handwritten Logic", d: "ML-tuned OCR for messy ink", i: Type },
-            { t: "Multi-Model AI", d: "GPT-4o, Claude 3.5, Gemini Pro", i: Sparkles },
-            { t: "Node Integration", d: "Google & Outlook cloud sync", i: Calendar },
-            { t: "Confidence Scoring", d: "Probability metrics per event", i: CheckCircle2 },
-            { t: "Inline Buffer", d: "Edit drafts before pushing live", i: ArrowRight },
-            { t: "ICS Serialization", d: "Universal calendar format export", i: FileText },
-            { t: "Custom Schema", d: "Bring your own LLM API keys", i: Zap },
-            { t: "Temporal Logic", d: "Complex recurring schedule support", i: Calendar },
+            { t: "Handwriting AI", d: "ML-tuned OCR for messy ink", i: Type },
+            { t: "The Best Models", d: "GPT-4o, Claude 3.5, Gemini Pro", i: Sparkles },
+            { t: "Cloud Sync", d: "Google & Outlook calendar sync", i: Calendar },
+            { t: "Confidence Score", d: "Accuracy metrics for every event", i: CheckCircle2 },
+            { t: "Easy Editing", d: "Fix anything before pushing live", i: ArrowRight },
+            { t: "ICS Export", d: "Export for any calendar app", i: FileText },
+            { t: "Custom API Keys", d: "Use your own AI provider keys", i: Zap },
+            { t: "Smart Schedules", d: "Full support for repeating events", i: Calendar },
           ].map((feature) => (
             <div
               key={feature.t}
@@ -260,13 +260,13 @@ export default function LandingPage() {
             </div>
             
             <h2 className="text-4xl md:text-5xl font-black text-text tracking-tighter mb-6 leading-tight">
-              Reclaim your time from<br />
-              <span className="text-primary italic">manual serialization.</span>
+              Stop typing your<br />
+              <span className="text-primary italic">schedule manually.</span>
             </h2>
             
             <p className="text-lg text-text-muted mb-12 font-medium max-w-xl mx-auto">
-              Deployment is instant. 20 free cycles per month. <br className="hidden md:block" />
-              No credit card. No friction. Just extraction.
+              Start in seconds. 20 free parses per month. <br className="hidden md:block" />
+              No credit card. No complicated setup. Just simplicity.
             </p>
             
             <div className="flex flex-col items-center gap-6">
@@ -274,7 +274,7 @@ export default function LandingPage() {
                 href="/signup"
                 className="group relative inline-flex items-center gap-3 bg-cta hover:bg-cta-hover text-white font-black px-10 py-5 rounded-[18px] text-xl transition-all shadow-xl shadow-cta/20 active:scale-95"
               >
-                Initialize Free Access
+                Start for Free
                 <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               </Link>
               
@@ -286,7 +286,7 @@ export default function LandingPage() {
                  <div className="w-[1px] h-6 bg-border" />
                  <div className="flex flex-col text-[10px] font-black text-text uppercase tracking-widest leading-none gap-1">
                     <span>99.8% precision</span>
-                    <span className="text-text-muted italic">AI Extraction accuracy</span>
+                    <span className="text-text-muted italic">Extraction accuracy</span>
                  </div>
               </div>
             </div>
@@ -305,13 +305,13 @@ export default function LandingPage() {
                 <span className="text-xl font-black text-text tracking-tight">ParseCal</span>
               </Link>
               <p className="text-sm text-text-muted font-medium max-w-[320px] mb-8 leading-relaxed">
-                The autonomous extraction protocol for real-world schedules. 
-                Turn unstructured chaos into structured productivity.
+                Automatically scan any schedule and create calendar events. 
+                Turn messy notes into organized productivity.
               </p>
               <div className="flex flex-wrap gap-3">
                 <div className="flex items-center gap-2 px-3 py-1 bg-success/5 border border-success/20 rounded-full">
                   <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-[10px] font-black text-success uppercase tracking-widest">Mainnet Operational</span>
+                  <span className="text-[10px] font-black text-success uppercase tracking-widest">System Status: Live</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/20 rounded-full">
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest text-nowrap">v1.2.0-STABLE</span>
@@ -319,20 +319,20 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* System Architecture & Live Operations - Replacing Intelligence Nodes */}
+            {/* Live History & System Ops */}
             <div className="col-span-1 md:col-span-2 lg:col-span-2">
               <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                Live Architecture & Ops
+                Live Status & Activity
               </h4>
               <div className="bg-bg border border-border rounded-2xl p-4 overflow-hidden relative group">
-                {/* Architecture Flow SVG */}
+                {/* Visual Flow */}
                 <div className="flex items-center justify-between gap-4 mb-4 border-b border-border pb-4">
                    <div className="flex flex-col items-center gap-1">
                       <div className="w-8 h-8 rounded-lg bg-bg-card border border-border flex items-center justify-center">
                          <FileText className="w-4 h-4 text-text-muted" />
                       </div>
-                      <span className="text-[8px] font-black text-text-muted uppercase">Source</span>
+                      <span className="text-[8px] font-black text-text-muted uppercase">Scan</span>
                    </div>
                    <div className="flex-1 h-[1px] bg-gradient-to-r from-border via-primary/50 to-border relative">
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-bg border border-primary flex items-center justify-center">
@@ -343,16 +343,16 @@ export default function LandingPage() {
                       <div className="w-8 h-8 rounded-lg bg-bg-card border border-border flex items-center justify-center">
                          <Calendar className="w-4 h-4 text-text-muted" />
                       </div>
-                      <span className="text-[8px] font-black text-text-muted uppercase">Sink</span>
+                      <span className="text-[8px] font-black text-text-muted uppercase">Sync</span>
                    </div>
                 </div>
 
                 {/* Operations Stream */}
                 <div className="space-y-2 font-mono text-[9px] leading-tight">
                    {[
-                     { op: "EXTRACT", src: "agenda_2025.pdf", out: "14 Events", conf: "98.2%" },
-                     { op: "VALIDATE", src: "text_snippet_01", out: "3 Events", conf: "99.1%" },
-                     { op: "SYNC", src: "img_capture_33", out: "8 Events", conf: "97.5%" },
+                     { op: "READ", src: "agenda_2025.pdf", out: "14 Events", conf: "98%" },
+                     { op: "REVIEW", src: "notes_snippet", out: "3 Events", conf: "99%" },
+                     { op: "PUSH", src: "photo_33.jpg", out: "8 Events", conf: "97%" },
                    ].map((log, i) => (
                      <div key={i} className="flex items-center justify-between text-text-muted group-hover:text-text transition-colors">
                         <div className="flex items-center gap-2">

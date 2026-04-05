@@ -113,14 +113,14 @@ export default function DashboardPreview() {
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${activeTab === 'parses' ? 'bg-primary/5 text-primary' : 'text-text-muted hover:bg-bg hover:text-text'}`}
           >
             <div className={`w-1.5 h-1.5 rounded-full ${activeTab === 'parses' ? 'bg-primary' : 'bg-transparent'}`} />
-            Parses
+            History
           </button>
           <button 
             onClick={() => setActiveTab("connected")}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl font-semibold text-sm transition-all ${activeTab === 'connected' ? 'bg-primary/5 text-primary' : 'text-text-muted hover:bg-bg hover:text-text'}`}
           >
             <div className={`w-1.5 h-1.5 rounded-full ${activeTab === 'connected' ? 'bg-primary' : 'bg-transparent'}`} />
-            Connected
+            Connections
           </button>
         </div>
 
@@ -129,7 +129,7 @@ export default function DashboardPreview() {
           className="mt-auto flex items-center justify-center gap-2 bg-cta hover:bg-cta-hover text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95"
         >
           <Plus className="w-4 h-4" />
-          New Parse
+          New Scan
         </button>
       </div>
 
@@ -278,7 +278,7 @@ export default function DashboardPreview() {
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-bold text-text flex items-center gap-2">
                   <span className="w-1.5 h-4 bg-primary rounded-full" />
-                  Recent Parses
+                  Recent Scans
                 </h3>
                 <div className="flex items-center gap-2">
                    <div className="flex items-center gap-1 bg-bg border border-border p-0.5 rounded-xl shadow-inner">
@@ -323,7 +323,7 @@ export default function DashboardPreview() {
         {activeTab === "parses" && (
           <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-text">Dossier: All Parses</h3>
+              <h3 className="text-lg font-bold text-text">Scan History</h3>
               <div className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-text-light" />
                 <div className="w-32 bg-bg border border-border rounded-lg h-8" />
@@ -334,7 +334,7 @@ export default function DashboardPreview() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-bg/40 border-b border-border">
                   <tr>
-                    <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Session</th>
+                    <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Source</th>
                     <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Status</th>
                     <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Date</th>
                     <th className="px-6 py-4 font-bold text-text-muted text-[10px] uppercase tracking-wider">Events</th>
@@ -366,7 +366,7 @@ export default function DashboardPreview() {
 
         {activeTab === "connected" && (
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-            <h3 className="text-lg font-bold text-text">Calendar Nodes</h3>
+            <h3 className="text-lg font-bold text-text">Connected Calendars</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-bg-card border border-primary/20 rounded-[24px] p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-4">
@@ -428,12 +428,12 @@ export default function DashboardPreview() {
                     <Settings className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-text text-sm">Global Push Sync</h4>
-                    <p className="text-[10px] text-text-muted">Automatically sync changes back to original files</p>
+                    <h4 className="font-bold text-text text-sm">Automatic Sync</h4>
+                    <p className="text-[10px] text-text-muted">Instantly save new events to your calendar</p>
                   </div>
                </div>
                <div className="flex items-center justify-between text-xs font-semibold px-2">
-                 <span>Auto-Push New Parses</span>
+                 <span>Auto-Add New Events</span>
                  <div className="w-10 h-5 bg-primary rounded-full relative">
                     <div className="absolute right-1 top-1 w-3 h-3 bg-white rounded-full shadow-sm" />
                  </div>
@@ -456,8 +456,8 @@ export default function DashboardPreview() {
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 mx-auto">
               <Sparkles className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="text-xl font-bold text-center mb-2">Initialize AI Parser</h3>
-            <p className="text-sm text-text-muted text-center mb-8">Drop your PDF, screenshot, or text here to start extracting events instantly.</p>
+            <h3 className="text-xl font-bold text-center mb-2">New AI Scan</h3>
+            <p className="text-sm text-text-muted text-center mb-8">Drop your PDF, photo, or text here to start creating events instantly.</p>
             
             <div className="space-y-3">
               <div className="h-12 border-2 border-dashed border-border rounded-xl flex items-center justify-center text-xs text-text-light font-medium">
