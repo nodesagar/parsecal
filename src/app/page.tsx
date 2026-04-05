@@ -22,21 +22,21 @@ export default function LandingPage() {
       </div>
 
       {/* Navigation */}
-      <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[16px] px-8 py-3 flex items-center justify-between max-w-[1400px] mx-auto">
-        <Link href="/" className="flex items-center gap-2 cursor-pointer">
+      <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[20px] px-4 md:px-8 py-3 flex items-center justify-between max-w-[1400px] mx-auto transition-all">
+        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0">
           <Calendar className="w-6 h-6 text-primary" />
-          <span className="text-xl font-bold text-text">ParseCal</span>
+          <span className="hidden sm:block text-xl font-bold text-text">ParseCal</span>
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <Link
             href="/login"
-            className="text-text-muted hover:text-text font-bold text-sm px-3 py-2 transition-all hover:scale-105 active:scale-95"
+            className="hidden sm:block text-text-muted hover:text-text font-bold text-sm px-3 py-2 transition-all hover:scale-105 active:scale-95"
           >
             Log in
           </Link>
           <Link
             href="/signup"
-            className="bg-cta hover:bg-cta-hover text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-cta/20 active:scale-95"
+            className="bg-cta hover:bg-cta-hover text-white font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl transition-all shadow-lg shadow-cta/20 active:scale-95 whitespace-nowrap"
           >
             Get Started
           </Link>
