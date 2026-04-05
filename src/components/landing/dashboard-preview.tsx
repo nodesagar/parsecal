@@ -21,11 +21,11 @@ import {
 type Tab = "dashboard" | "parses" | "connected";
 
 const MOCK_EVENTS = [
-  { id: "1", title: "Product Sync", start: "2026-04-13T10:00:00", provider: "google" as const, location: "Meeting Room A" },
-  { id: "2", title: "Design Review", start: "2026-04-14T14:30:00", provider: "google" as const, location: "Zoom" },
-  { id: "3", title: "Weekly Planning", start: "2026-04-15T09:00:00", provider: "google" as const, location: "Main Office" },
-  { id: "4", title: "Client Call", start: "2026-04-16T16:00:00", provider: "google" as const, location: "Phone" },
-  { id: "5", title: "Team Lunch", start: "2026-04-17T12:00:00", provider: "google" as const, location: "The Bistro" },
+  { id: "1", title: "Product Sync", start: "2026-04-13T10:00:00", provider: "google" as "google" | "outlook", location: "Meeting Room A" },
+  { id: "2", title: "Design Review", start: "2026-04-14T14:30:00", provider: "google" as "google" | "outlook", location: "Zoom" },
+  { id: "3", title: "Weekly Planning", start: "2026-04-15T09:00:00", provider: "google" as "google" | "outlook", location: "Main Office" },
+  { id: "4", title: "Client Call", start: "2026-04-16T16:00:00", provider: "google" as "google" | "outlook", location: "Phone" },
+  { id: "5", title: "Team Lunch", start: "2026-04-17T12:00:00", provider: "google" as "google" | "outlook", location: "The Bistro" },
 ];
 
 const MOCK_SESSIONS = [
@@ -172,7 +172,12 @@ export default function DashboardPreview() {
                       onClick={() => setProvider("outlook")}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'outlook' ? 'bg-white shadow-md border border-border text-[#0078d4]' : 'text-text-muted hover:text-text'}`}
                     >
-                      <Globe className={`w-3.5 h-3.5 ${provider === 'outlook' ? 'text-[#0078d4]' : ''}`} />
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 16.5V7.5L12 3L3 7.5V16.5L12 21L21 16.5Z" fill="#0078D4" />
+                        <path d="M12 3V21L21 16.5V7.5L12 3Z" fill="#005A9E" />
+                        <path d="M12 11.25H21V12.75H12V11.25Z" fill="white" fillOpacity="0.2" />
+                        <path d="M7 9C5.89543 9 5 9.89543 5 11V13C5 14.1046 5.89543 15 7 15H9C10.1046 15 11 14.1046 11 13V11C11 9.89543 10.1046 9 9 9H7ZM7 10.5H9C9.27614 10.5 9.5 10.7239 9.5 11V13C9.5 13.2761 9.27614 13.5 9 13.5H7C6.72386 13.5 6.5 13.2761 6.5 11V11C6.5 10.7239 6.72386 10.5 7 10.5Z" fill="white" />
+                      </svg>
                       Outlook
                     </button>
                   </div>
