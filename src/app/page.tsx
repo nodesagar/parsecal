@@ -13,9 +13,16 @@ import DashboardPreview from "@/components/landing/dashboard-preview";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-bg">
+    <main className="min-h-screen bg-bg selection:bg-primary/20 relative overflow-x-hidden">
+      {/* Background Ambience */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute top-[20%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[10%] left-[-10%] w-[40%] h-[40%] bg-purple-500/5 rounded-full blur-[120px]" />
+      </div>
+
       {/* Navigation */}
-      <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[16px] px-6 py-3 flex items-center justify-between">
+      <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[16px] px-8 py-3 flex items-center justify-between max-w-[1400px] mx-auto">
         <Link href="/" className="flex items-center gap-2 cursor-pointer">
           <Calendar className="w-6 h-6 text-primary" />
           <span className="text-xl font-bold text-text">ParseCal</span>
@@ -37,7 +44,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 max-w-5xl mx-auto text-center">
+      <section className="pt-40 pb-24 px-6 max-w-7xl mx-auto text-center relative z-10">
         <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-sm font-medium px-4 py-1.5 rounded-full mb-6">
           <Sparkles className="w-4 h-4" />
           AI-Powered Schedule Scanner
@@ -71,7 +78,7 @@ export default function LandingPage() {
       </section>
 
       {/* Dashboard Preview */}
-      <section className="pb-20 px-6 max-w-6xl mx-auto">
+      <section className="pb-20 px-6 max-w-7xl mx-auto relative z-10">
         <div className="relative group">
           <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 via-cta/20 to-primary/20 rounded-[32px] blur-xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
           <div className="relative bg-bg/50 backdrop-blur-3xl border border-white/20 p-2 md:p-4 rounded-[28px] overflow-hidden shadow-2xl">
@@ -83,7 +90,7 @@ export default function LandingPage() {
       </section>
 
       {/* Input Types - Dossier Style */}
-      <section className="pb-32 px-6 max-w-6xl mx-auto">
+      <section className="pb-36 px-6 max-w-[1400px] mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
@@ -135,7 +142,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works - Operational Protocol */}
-      <section id="how-it-works" className="pb-32 px-6 max-w-6xl mx-auto border-t border-border/50 pt-32">
+      <section id="how-it-works" className="pb-36 px-6 max-w-[1400px] mx-auto border-t border-border/50 pt-32 relative z-10">
         <div className="text-center mb-20">
           <h2 className="text-4xl font-extrabold text-text tracking-tight mb-4">
             Upload once. Done in seconds.
@@ -205,8 +212,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features - Capabilities Matrix */}
-      <section className="pb-32 px-6 max-w-6xl mx-auto border-t border-border/50 pt-32">
+      {/* Capabilities Matrix */}
+      <section className="pb-36 px-6 max-w-[1400px] mx-auto border-t border-border/50 pt-32 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 text-center md:text-left">
            <div>
              <h2 className="text-3xl font-extrabold text-text tracking-tight mb-2">
@@ -244,7 +251,7 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA - Secure Terminal Style */}
-      <section className="pb-40 px-6 max-w-5xl mx-auto">
+      <section className="pb-40 px-6 max-w-5xl mx-auto relative z-10">
         <div className="relative overflow-hidden bg-bg-card border border-border rounded-[40px] p-12 md:p-20 text-center shadow-2xl">
           {/* Background Decorative Element */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary/0 via-primary/30 to-primary/0" />
@@ -291,8 +298,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer - Premium Multi-column */}
-      <footer className="border-t border-border bg-bg-card/50 pt-20 pb-12 px-6">
-        <div className="max-w-6xl mx-auto">
+      <footer className="py-24 px-6 border-t border-border bg-bg-card relative z-10">
+        <div className="max-w-[1400px] mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-16 mb-16">
             {/* Brand Section */}
             <div className="col-span-1 md:col-span-2">
@@ -378,6 +385,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
