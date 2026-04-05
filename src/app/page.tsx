@@ -297,48 +297,51 @@ export default function LandingPage() {
       {/* Footer - Premium Multi-column */}
       <footer className="border-t border-border bg-bg-card/50 pt-20 pb-12 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-16 mb-16">
             {/* Brand Section */}
-            <div className="col-span-2 lg:col-span-2">
+            <div className="col-span-1 md:col-span-2">
               <Link href="/" className="flex items-center gap-2 mb-6">
                 <Calendar className="w-6 h-6 text-primary" />
                 <span className="text-xl font-black text-text tracking-tight">ParseCal</span>
               </Link>
-              <p className="text-sm text-text-muted font-medium max-w-[280px] mb-6 leading-relaxed">
+              <p className="text-sm text-text-muted font-medium max-w-[320px] mb-8 leading-relaxed">
                 The autonomous extraction protocol for real-world schedules. 
                 Turn unstructured chaos into structured productivity.
               </p>
-              <div className="flex items-center gap-2 px-3 py-1 bg-success/5 border border-success/20 rounded-full w-fit">
-                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                <span className="text-[10px] font-black text-success uppercase tracking-widest">System Operational</span>
+              <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-2 px-3 py-1 bg-success/5 border border-success/20 rounded-full">
+                  <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                  <span className="text-[10px] font-black text-success uppercase tracking-widest">Mainnet Operational</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1 bg-primary/5 border border-primary/20 rounded-full">
+                  <span className="text-[10px] font-black text-primary uppercase tracking-widest text-nowrap">v1.2.0-STABLE</span>
+                </div>
               </div>
             </div>
 
-            {/* Product Column */}
-            <div>
-              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-6">Product</h4>
-              <ul className="space-y-4">
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Visual Engine</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Document Parse</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">API Access</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Integrations</Link></li>
-              </ul>
-            </div>
-
-            {/* Resources Column */}
-            <div>
-              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-6">Resources</h4>
-              <ul className="space-y-4">
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Documentation</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Changelog</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Pricing</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Community</Link></li>
-              </ul>
+            {/* Intelligence Nodes Area - Replacing Product & Resources */}
+            <div className="col-span-1 md:col-span-2 lg:col-span-2">
+              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-8">Intelligence Nodes</h4>
+              <div className="grid grid-cols-2 gap-4">
+                 {[
+                   { name: "Gemini Pro", status: "READY", color: "text-blue-500", bg: "bg-blue-500/10" },
+                   { name: "GPT-4o Engine", status: "ACTIVE", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                   { name: "Claude 3.5", status: "READY", color: "text-purple-500", bg: "bg-purple-500/10" },
+                   { name: "Sync Protocol", status: "ACTIVE", color: "text-primary", bg: "bg-primary/10" },
+                 ].map((node) => (
+                   <div key={node.name} className="flex items-center justify-between p-3 bg-bg border border-border rounded-xl">
+                      <span className="text-xs font-bold text-text">{node.name}</span>
+                      <span className={`text-[9px] font-black ${node.bg} ${node.color} px-2 py-0.5 rounded-md`}>
+                        {node.status}
+                      </span>
+                   </div>
+                 ))}
+              </div>
             </div>
 
             {/* Company Column */}
-            <div>
-              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-6">Legal</h4>
+            <div className="col-span-1">
+              <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-8">Legal</h4>
               <ul className="space-y-4">
                 <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Privacy Policy</Link></li>
                 <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Terms of Use</Link></li>
