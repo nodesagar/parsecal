@@ -383,13 +383,13 @@ export default function LandingPage() {
               href="https://github.com/nodesagar" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="group flex items-center gap-2"
+              className="group flex items-center gap-1.5 py-1 px-3 rounded-full hover:bg-white/5 transition-all active:scale-95"
             >
-              <span className="text-[10px] font-black text-text-light uppercase tracking-tighter italic opacity-50 group-hover:opacity-100 transition-opacity">
-                Curated by
+              <span className="text-[11px] font-bold text-text-light uppercase tracking-tight">
+                Built with <span className="group-hover:animate-pulse">❤️</span> and ☕ by
               </span>
-              <span className="text-[10px] font-black text-text uppercase tracking-widest border-b-2 border-primary/20 group-hover:border-primary transition-all">
-                nodesagar
+              <span className="text-[11px] font-black text-text uppercase tracking-widest border-b-2 border-primary/20 group-hover:border-primary transition-all">
+                Sagar
               </span>
             </a>
           </div>
