@@ -214,10 +214,6 @@ export default function LandingPage() {
              </h2>
              <p className="text-text-muted font-medium">Everything you need to stop typing events manually.</p>
            </div>
-           <div className="px-4 py-2 bg-success/5 border border-success/20 rounded-full flex items-center gap-2 mx-auto md:mx-0">
-             <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-             <span className="text-[10px] font-black text-success uppercase tracking-widest">System Active</span>
-           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
