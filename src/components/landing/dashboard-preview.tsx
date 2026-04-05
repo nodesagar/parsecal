@@ -65,6 +65,7 @@ const MOCK_SESSIONS = [
 
 export default function DashboardPreview() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [provider, setProvider] = useState<"google" | "outlook">("google");
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 1)); // April 2026
   const [filter, setFilter] = useState<"all" | "draft">("all");
   const [selectedEvent, setSelectedEvent] = useState<typeof MOCK_EVENTS[0] | null>(null);
@@ -82,6 +83,11 @@ export default function DashboardPreview() {
     if (filter === "all") return MOCK_SESSIONS.slice(0, 2);
     return MOCK_SESSIONS.filter(s => s.status === "draft");
   }, [filter]);
+
+  const providerEvents = useMemo(() => {
+    if (provider === "google") return MOCK_EVENTS;
+    return MOCK_EVENTS.map(e => ({ ...e, title: `[Outlook] ${e.title}`, provider: "outlook" as const }));
+  }, [provider]);
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6 text-left relative min-h-[520px]">
@@ -142,15 +148,38 @@ export default function DashboardPreview() {
                     <h3 className="font-bold text-text transition-all">{monthName} {year}</h3>
                     <p className="text-[10px] text-primary font-bold flex items-center gap-1 uppercase tracking-wider">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                      Viewing Google Calendar
+                      Viewing {provider === 'google' ? 'Google' : 'Outlook'} Calendar
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  {/* Provider Toggle */}
                   <div className="flex items-center gap-1 bg-border/20 p-1 rounded-xl">
-                    <button onClick={goToday} className="p-1 px-3 border border-border bg-white rounded-[8px] text-[10px] font-bold shadow-sm hover:bg-bg transition-colors active:scale-95">Today</button>
+                    <button 
+                      onClick={() => setProvider("google")}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'google' ? 'bg-white shadow-md border border-border text-[#4285F4]' : 'text-text-muted hover:text-text'}`}
+                    >
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                      </svg>
+                      Google
+                    </button>
+                    <button 
+                      onClick={() => setProvider("outlook")}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'outlook' ? 'bg-white shadow-md border border-border text-[#0078d4]' : 'text-text-muted hover:text-text'}`}
+                    >
+                      <Globe className={`w-3.5 h-3.5 ${provider === 'outlook' ? 'text-[#0078d4]' : ''}`} />
+                      Outlook
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1 bg-border/20 p-1 rounded-xl">
                     <button onClick={prevMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronLeft className="w-3 h-3" /></button>
+                    <button onClick={goToday} className="p-1 px-3 border border-border bg-white rounded-[8px] text-[10px] font-bold shadow-sm hover:bg-bg transition-colors active:scale-95 uppercase tracking-tighter">Today</button>
                     <button onClick={nextMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronRight className="w-3 h-3" /></button>
                   </div>
                 </div>
@@ -181,12 +210,12 @@ export default function DashboardPreview() {
                         </span>
                       )}
                       {hasEvents && (
-                        <div className="mt-1 space-y-0.5">
+                        <div className="mt-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-300">
                           <button 
-                            onClick={() => setSelectedEvent(MOCK_EVENTS.find(e => new Date(e.start).getDate() === day) || null)}
-                            className="w-full text-left bg-primary/10 text-primary text-[8px] font-bold px-1.5 py-1 rounded-md truncate border border-primary/10 hover:bg-primary/20 transition-all active:scale-95"
+                            onClick={() => setSelectedEvent(providerEvents.find(e => new Date(e.start).getDate() === day) || null)}
+                            className={`w-full text-left text-[8px] font-bold px-1.5 py-1 rounded-md truncate border transition-all active:scale-95 ${provider === 'google' ? 'bg-[#4285F4]/10 text-[#4285F4] border-[#4285F4]/10 hover:bg-[#4285F4]/20' : 'bg-[#0078d4]/10 text-[#0078d4] border-[#0078d4]/10 hover:bg-[#0078d4]/20'}`}
                           >
-                            {MOCK_EVENTS.find(e => new Date(e.start).getDate() === day)?.title}
+                            {providerEvents.find(e => new Date(e.start).getDate() === day)?.title}
                           </button>
                         </div>
                       )}
@@ -199,7 +228,7 @@ export default function DashboardPreview() {
                 <div className="absolute bottom-4 left-4 right-4 bg-bg-card border border-primary/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-bottom-4 transition-all z-20">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      <div className={`w-2 h-2 rounded-full ${provider === 'google' ? 'bg-[#4285F4]' : 'bg-[#0078d4]'}`} />
                       <h4 className="text-sm font-bold text-text">{selectedEvent.title}</h4>
                     </div>
                     <button onClick={() => setSelectedEvent(null)}>
@@ -212,7 +241,7 @@ export default function DashboardPreview() {
                       {new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className="font-bold text-primary">@</span>
+                      <span className={`font-bold ${provider === 'google' ? 'text-[#4285F4]' : 'text-[#0078d4]'}`}>@</span>
                       {selectedEvent.location}
                     </span>
                   </div>
