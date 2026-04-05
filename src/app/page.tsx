@@ -27,16 +27,16 @@ export default function LandingPage() {
           <Calendar className="w-6 h-6 text-primary" />
           <span className="text-xl font-bold text-text">ParseCal</span>
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Link
             href="/login"
-            className="text-sm font-medium text-text-muted hover:text-text cursor-pointer"
+            className="text-text-muted hover:text-text font-bold text-sm px-3 py-2 transition-all hover:scale-105 active:scale-95"
           >
             Log in
           </Link>
           <Link
             href="/signup"
-            className="text-sm font-semibold bg-cta hover:bg-cta-hover text-white px-4 py-2 rounded-[10px] cursor-pointer"
+            className="bg-cta hover:bg-cta-hover text-white font-bold text-sm px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-cta/20 active:scale-95"
           >
             Get Started
           </Link>
