@@ -22,21 +22,23 @@ export default function LandingPage() {
       </div>
 
       {/* Navigation */}
-      <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[20px] px-4 md:px-8 py-3 flex items-center justify-between max-w-[1400px] mx-auto transition-all">
-        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0">
-          <Calendar className="w-6 h-6 text-primary" />
+      <nav className="fixed top-4 left-4 right-4 z-50 bg-bg-card/90 backdrop-blur-sm border border-border rounded-[20px] px-3 sm:px-8 py-3 flex items-center justify-between max-w-[1400px] mx-auto transition-all">
+        <Link href="/" className="flex items-center gap-1.5 sm:gap-2 cursor-pointer shrink-0">
+          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+            <Calendar className="w-4 h-4 text-primary" />
+          </div>
           <span className="hidden sm:block text-xl font-bold text-text">ParseCal</span>
         </Link>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1 sm:gap-4">
           <Link
             href="/login"
-            className="hidden sm:block text-text-muted hover:text-text font-bold text-sm px-3 py-2 transition-all hover:scale-105 active:scale-95"
+            className="text-text-muted hover:text-text font-bold text-xs sm:text-sm px-2 sm:px-4 py-2 transition-all hover:scale-105 active:scale-95 whitespace-nowrap"
           >
             Log in
           </Link>
           <Link
             href="/signup"
-            className="bg-cta hover:bg-cta-hover text-white font-bold text-xs sm:text-sm px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl transition-all shadow-lg shadow-cta/20 active:scale-95 whitespace-nowrap"
+            className="bg-cta hover:bg-cta-hover text-white font-bold text-xs sm:text-sm px-3 sm:px-6 py-2 sm:py-2.5 rounded-xl transition-all shadow-lg shadow-cta/20 active:scale-95 whitespace-nowrap"
           >
             Get Started
           </Link>
