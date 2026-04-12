@@ -368,9 +368,9 @@ export default function LandingPage() {
             <div className="col-span-1">
               <h4 className="text-[11px] font-black text-text uppercase tracking-[0.2em] mb-8">Legal</h4>
               <ul className="space-y-4">
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Privacy Policy</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Terms of Use</Link></li>
-                <li><Link href="#" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Open Source</Link></li>
+                <li><Link href="/privacy" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Terms of Use</Link></li>
+                <li><a href="https://github.com/nodesagar/parsecal" target="_blank" rel="noopener noreferrer" className="text-sm text-text-muted font-semibold hover:text-primary transition-colors">Open Source</a></li>
               </ul>
             </div>
           </div>
