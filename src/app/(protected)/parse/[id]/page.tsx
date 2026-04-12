@@ -129,6 +129,20 @@ export default function ReviewPage() {
     }
 
     async function deleteEvent(eventId: string) {
+        const eventInfo = events.find((e) => e.id === eventId);
+        
+        // If it was already pushed, attempt to delete from external calendar too
+        if (eventInfo?.external_event_id && eventInfo?.pushed_to_provider) {
+            try {
+                // Background deletion, don't block UI
+                fetch(`/api/calendar/events?provider=${eventInfo.pushed_to_provider}&eventId=${eventInfo.external_event_id}`, {
+                    method: 'DELETE'
+                });
+            } catch (err) {
+                console.error("Failed to delete external event:", err);
+            }
+        }
+
         setEvents((prev) => prev.filter((e) => e.id !== eventId));
         await supabase.from('parsed_events').delete().eq('id', eventId);
     }
@@ -137,11 +151,21 @@ export default function ReviewPage() {
         setEditingId(event.id);
         const presets = ['RRULE:FREQ=DAILY', 'RRULE:FREQ=WEEKLY', 'RRULE:FREQ=BIWEEKLY', 'RRULE:FREQ=MONTHLY'];
         setCustomRuleMode(!!event.recurrence_rule && !presets.includes(event.recurrence_rule));
+        
+        // Helper to convert DB ISO string to local input format
+        const toLocalInput = (iso: string | null) => {
+            if (!iso) return '';
+            const date = new Date(iso);
+            if (isNaN(date.getTime())) return '';
+            const tzOffset = date.getTimezoneOffset() * 60000;
+            return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+        };
+
         setEditValues({
             title: event.title,
             description: event.description,
-            start_datetime: event.start_datetime,
-            end_datetime: event.end_datetime,
+            start_datetime: toLocalInput(event.start_datetime),
+            end_datetime: toLocalInput(event.end_datetime),
             is_all_day: event.is_all_day,
             location: event.location,
             is_recurring: event.is_recurring,
@@ -153,16 +177,27 @@ export default function ReviewPage() {
         const existingEvent = events.find((event) => event.id === eventId);
         if (!existingEvent) return;
 
+        // Helper to convert naive input value back to UTC ISO
+        const toUtcIso = (input: string | undefined | null) => {
+            if (!input) return null;
+            // new Date(input) on a naive string like "2026-04-12T23:30" 
+            // will correctly use the browser's local timezone.
+            const date = new Date(input);
+            if (isNaN(date.getTime())) return null;
+            return date.toISOString();
+        };
+
         const updatePayload = {
             title: editValues.title ?? existingEvent.title,
             description: editValues.description ?? existingEvent.description,
-            start_datetime: editValues.start_datetime ?? existingEvent.start_datetime,
-            end_datetime: editValues.end_datetime ?? existingEvent.end_datetime,
-            is_all_day: editValues.is_all_day ?? existingEvent.is_all_day,
+            start_datetime: toUtcIso(editValues.start_datetime) || existingEvent.start_datetime,
+            end_datetime: toUtcIso(editValues.end_datetime),
+            is_all_day: !!editValues.is_all_day,
             location: editValues.location ?? existingEvent.location,
-            is_recurring: editValues.is_recurring ?? existingEvent.is_recurring,
+            is_recurring: !!editValues.is_recurring,
             recurrence_rule: editValues.recurrence_rule ?? existingEvent.recurrence_rule,
             is_edited: true,
+            pushed_at: null, // Reset push status on edit to allow re-pushing
         };
 
         await supabase
@@ -677,7 +712,7 @@ export default function ReviewPage() {
                                     </div>
 
                                     {/* Actions */}
-                                    {!isEditing && !event.pushed_at && (
+                                    {!isEditing && (
                                         <div className="flex items-center gap-1 flex-shrink-0">
                                             <button
                                                 onClick={() => startEdit(event)}
@@ -708,14 +743,14 @@ export default function ReviewPage() {
                             <select
                                 value={selectedProvider}
                                 onChange={(e) => setSelectedProvider(e.target.value)}
-                                className="w-full md:w-[190px] appearance-none bg-bg-card border border-border/60 hover:border-primary/40 rounded-[14px] pl-10 pr-10 py-3 text-sm font-bold text-text focus:border-primary focus:outline-none cursor-pointer transition-all shadow-sm group-hover:shadow-md"
+                                className="w-full md:w-[200px] appearance-none bg-bg-card border border-border/60 hover:border-primary/40 rounded-[14px] pl-10 pr-8 py-3 text-sm font-bold text-text focus:border-primary focus:outline-none cursor-pointer transition-all shadow-sm group-hover:shadow-md"
                             >
                                 {googleConnected && <option value="google">Google Calendar</option>}
                                 {outlookConnected && <option value="outlook">Outlook Calendar</option>}
                                 <option value="ics">.ics Download</option>
                             </select>
                             <Calendar className="w-4 h-4 text-primary absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none group-hover:scale-110 transition-transform" />
-                            <ChevronDown className="w-4 h-4 text-text-muted absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none group-hover:translate-y-[-40%] transition-transform" />
+                             <ChevronDown className="w-4 h-4 text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none group-hover:translate-y-[-40%] transition-transform" />
                         </div>
 
                         {showCalendarConnectCta && (

@@ -56,6 +56,11 @@ function SettingsContent() {
                 .select('*')
                 .eq('id', user.id)
                 .single();
+            // Auto-detect timezone if not set or if it's the first time
+            if (profileData && (!profileData.default_timezone || profileData.default_timezone === 'UTC' || profileData.default_timezone === 'Africa/Abidjan')) {
+                const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                profileData.default_timezone = localTz;
+            }
             setProfile(profileData);
 
             const { data: calData } = await supabase

@@ -246,3 +246,100 @@ async function fetchOutlookEvents(connection: any, startDate: Date, endDate: Dat
         provider: 'outlook' as const,
     }));
 }
+
+/**
+ * DELETE /api/calendar/events?provider=google|outlook&eventId=123
+ * Deletes a real event from the user's connected calendar.
+ */
+export async function DELETE(request: NextRequest) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const provider = searchParams.get('provider');
+        const eventId = searchParams.get('eventId');
+
+        if (!provider || (provider !== 'google' && provider !== 'outlook')) {
+            return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });
+        }
+
+        if (!eventId) {
+            return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
+        }
+
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Get connection
+        const { data: connections } = await supabase
+            .from('connected_calendars')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('provider', provider)
+            .eq('is_active', true)
+            .order('updated_at', { ascending: false })
+            .limit(1);
+
+        const connection = connections?.[0];
+        if (!connection) {
+            return NextResponse.json({ error: `No active ${provider} connection found` }, { status: 404 });
+        }
+
+        let isDeleted = false;
+
+        if (provider === 'google') {
+            const oauth2Client = getGoogleOAuthClient(request.url);
+            let accessToken = connection.access_token;
+            
+            // Reusing token checking logic
+            const tokenExpiresAt = new Date(connection.token_expires_at).getTime();
+            const needsRefresh = tokenExpiresAt <= Date.now() + 60_000;
+        
+            if (needsRefresh && connection.refresh_token) {
+                oauth2Client.setCredentials({ refresh_token: connection.refresh_token });
+                const { credentials } = await oauth2Client.refreshAccessToken();
+                accessToken = credentials.access_token ?? accessToken;
+            }
+            
+            oauth2Client.setCredentials({
+                access_token: accessToken,
+                refresh_token: connection.refresh_token,
+            });
+
+            const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+            await calendar.events.delete({
+                calendarId: connection.calendar_id || 'primary',
+                eventId: eventId,
+            });
+            isDeleted = true;
+        } else {
+            let accessToken = connection.access_token;
+            // Refresher check
+            const needsRefresh = new Date(connection.token_expires_at).getTime() <= Date.now() + 60_000;
+            if (needsRefresh) {
+                const refreshed = await refreshOutlookAccessToken(connection.refresh_token);
+                accessToken = refreshed.access_token;
+            }
+
+            const res = await fetch(`${MICROSOFT_GRAPH_BASE_URL}/me/events/${eventId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            
+            if (!res.ok) {
+                throw new Error(`Outlook delete error: ${res.status}`);
+            }
+            isDeleted = true;
+        }
+
+        return NextResponse.json({ success: isDeleted });
+    } catch (error) {
+        console.error('Calendar events delete error:', error);
+        const message = error instanceof Error ? error.message : 'Failed to delete event';
+        return NextResponse.json({ error: message }, { status: 500 });
+    }
+}

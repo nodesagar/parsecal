@@ -73,16 +73,21 @@ export function getGoogleAuthUrl(stateValue: string, requestUrl?: string) {
     });
 }
 
-export function extractIsoDate(dateValue: string): string {
-    const match = dateValue.match(/^(\d{4}-\d{2}-\d{2})/);
-    if (match) return match[1];
-
-    const parsed = new Date(dateValue);
-    if (Number.isNaN(parsed.getTime())) {
+export function extractLocalIsoDate(dateValue: string, timezone: string = 'UTC'): string {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) {
         throw new Error(`Invalid date value: ${dateValue}`);
     }
 
-    return parsed.toISOString().split('T')[0];
+    // Use Intl.DateTimeFormat to get the date in the specified timezone
+    const formatter = new Intl.DateTimeFormat('en-CA', { // en-CA gives YYYY-MM-DD
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    });
+    
+    return formatter.format(date);
 }
 
 export function addDaysToIsoDate(isoDate: string, days: number): string {
@@ -114,12 +119,12 @@ export function convertToGoogleEvent(
     }
 
     if (event.is_all_day) {
-        const startDate = extractIsoDate(event.start_datetime);
+        const startDate = extractLocalIsoDate(event.start_datetime, tz);
         const endDate = addDaysToIsoDate(
-            event.end_datetime ? extractIsoDate(event.end_datetime) : startDate,
+            event.end_datetime ? extractLocalIsoDate(event.end_datetime, tz) : startDate,
             1
         );
-
+ 
         gEvent.start = { date: startDate, timeZone: tz };
         // End date in Google for all day is exclusive
         gEvent.end = { date: endDate, timeZone: tz };

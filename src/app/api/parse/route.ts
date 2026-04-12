@@ -60,6 +60,39 @@ function isNonCriticalStorageUploadError(message: string | undefined): boolean {
     );
 }
 
+/**
+ * Ensures a datetime string is in UTC ISO format.
+ * If naive (no offset), it assumes it's in the provided timezone.
+ */
+function toUtcIso(dateStr: string | null | undefined, timezone: string): string | null {
+    if (!dateStr) return null;
+    // Strict ISO 8601 with offset or Z
+    if (/[+-]\d{2}:?\d{2}$|Z$/.test(dateStr) || /[+-]\d{4}$/.test(dateStr)) return dateStr;
+
+    try {
+        // Handle space between date and time
+        const cleanDateStr = dateStr.includes(' ') ? dateStr.replace(' ', 'T') : dateStr;
+        const date = new Date(cleanDateStr + 'Z');
+        if (isNaN(date.getTime())) return dateStr;
+
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone,
+            timeZoneName: 'shortOffset'
+        }).formatToParts(date);
+        const tzPart = parts.find(p => p.type === 'timeZoneName')?.value || 'GMT';
+        const offsetMatch = tzPart.match(/GMT([+-])(\d+)(?::(\d+))?/);
+        
+        if (offsetMatch) {
+            const [_, sign, h, m] = offsetMatch;
+            const offsetMinutes = (parseInt(h) * 60 + (m ? parseInt(m) : 0)) * (sign === '+' ? 1 : -1);
+            return new Date(date.getTime() - offsetMinutes * 60000).toISOString();
+        }
+    } catch (e) {
+        console.warn('Failed to parse timezone offset for AI extraction:', e);
+    }
+    return dateStr;
+}
+
 export async function POST(request: Request) {
     try {
         const supabase = await createClient();
@@ -127,6 +160,7 @@ export async function POST(request: Request) {
         const rawInputType = formData.get('inputType');
         const rawTextInput = formData.get('textInput');
         const rawFile = formData.get('file');
+        const requestTimezone = formData.get('timezone');
 
         if (typeof rawInputType !== 'string' || !isAllowedInputType(rawInputType)) {
             return NextResponse.json({ error: 'Invalid inputType' }, { status: 400 });
@@ -135,6 +169,7 @@ export async function POST(request: Request) {
         const inputType = rawInputType;
         const textInput = typeof rawTextInput === 'string' ? rawTextInput : null;
         const file = rawFile instanceof File ? rawFile : null;
+        const userTimezone = (typeof requestTimezone === 'string' ? requestTimezone : profile.default_timezone) || 'UTC';
 
         if ((inputType === 'text' && !textInput?.trim()) || (inputType !== 'text' && !file)) {
             return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
@@ -271,7 +306,7 @@ export async function POST(request: Request) {
             type: inputType,
             content: inputType === 'text' ? (textInput || '') : fileBase64,
             mimeType: fileMimeType || undefined,
-            timezone: profile.default_timezone,
+            timezone: userTimezone,
         };
 
         // Get AI providers (with fallback chain)
@@ -354,8 +389,8 @@ export async function POST(request: Request) {
                 session_id: session.id,
                 title: event.title,
                 description: event.description,
-                start_datetime: event.start_datetime,
-                end_datetime: event.end_datetime,
+                start_datetime: toUtcIso(event.start_datetime, userTimezone),
+                end_datetime: toUtcIso(event.end_datetime, userTimezone),
                 is_all_day: event.is_all_day,
                 location: event.location,
                 is_recurring: event.is_recurring,

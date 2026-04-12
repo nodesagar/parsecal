@@ -8,13 +8,14 @@ import {
   Settings,
   LogOut,
   Calendar,
-  Plus,
+  Clock,
+  Link2,
 } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/parse/new", label: "New Parse", icon: Plus },
-  { href: "/calendars", label: "Calendars", icon: Calendar },
+  { href: "/history", label: "History", icon: Clock },
+  { href: "/calendars", label: "Connections", icon: Link2 },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

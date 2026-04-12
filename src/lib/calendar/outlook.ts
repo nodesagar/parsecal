@@ -263,8 +263,14 @@ export async function getOutlookAccountIdentifier(accessToken: string) {
   return profile.mail || profile.userPrincipalName || null;
 }
 
-function formatDateOnly(date: Date) {
-  return date.toISOString().split("T")[0];
+function formatDateOnly(date: Date, timezone: string = 'UTC') {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  return formatter.format(date);
 }
 
 function formatGraphDateTime(dateInput: string) {
@@ -324,7 +330,7 @@ function buildOutlookRecurrence(
   const intervalRaw = Number.parseInt(rrule.INTERVAL || "1", 10);
   const interval =
     Number.isFinite(intervalRaw) && intervalRaw > 0 ? intervalRaw : 1;
-  const startDate = formatDateOnly(startDateObj);
+  const startDate = formatDateOnly(startDateObj, 'UTC'); // Internal RRULE logic often assumes UTC or handles conversion
   const startDay = startDateObj.getUTCDate();
   const startMonth = startDateObj.getUTCMonth() + 1;
   const startWeekday =
@@ -394,6 +400,7 @@ function buildOutlookRecurrence(
 
 export function convertToOutlookEvent(
   event: ParsedEventFromAI,
+  userTimezone: string = "UTC"
 ): OutlookEventPayload {
   const outlookEvent: OutlookEventPayload = {
     subject: event.title,
@@ -424,12 +431,12 @@ export function convertToOutlookEvent(
     const endDateExclusive = addDays(endDateBase, 1);
 
     outlookEvent.start = {
-      dateTime: `${formatDateOnly(startDate)}T00:00:00`,
-      timeZone: "UTC",
+      dateTime: `${formatDateOnly(startDate, userTimezone)}T00:00:00`,
+      timeZone: userTimezone,
     };
     outlookEvent.end = {
-      dateTime: `${formatDateOnly(endDateExclusive)}T00:00:00`,
-      timeZone: "UTC",
+      dateTime: `${formatDateOnly(endDateExclusive, userTimezone)}T00:00:00`,
+      timeZone: userTimezone,
     };
   } else {
     const startDate = new Date(event.start_datetime);
@@ -443,11 +450,11 @@ export function convertToOutlookEvent(
 
     outlookEvent.start = {
       dateTime: formatGraphDateTime(event.start_datetime),
-      timeZone: "UTC",
+      timeZone: userTimezone,
     };
     outlookEvent.end = {
       dateTime: formatGraphDateTime(endDate.toISOString()),
-      timeZone: "UTC",
+      timeZone: userTimezone,
     };
   }
 

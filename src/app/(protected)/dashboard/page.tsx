@@ -162,10 +162,18 @@ export default async function DashboardPage() {
 
             {/* Recent Sessions */}
             <div>
-                <h2 className="text-lg font-semibold text-text mb-4 flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-text-muted" />
-                    Recent Parses
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-text flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-text-muted" />
+                        Recent Parses
+                    </h2>
+                    <Link
+                        href="/history"
+                        className="text-sm font-medium text-primary hover:underline transition-all"
+                    >
+                        View All
+                    </Link>
+                </div>
 
                 {!sessions || sessions.length === 0 ? (
                     <div className="bg-bg-card border border-border rounded-[16px] p-8 text-center">

@@ -105,6 +105,9 @@ export default function NewParsePage() {
         formData.append("inputType", "text");
       }
 
+      // Add user's current timezone to ensure correct date interpretation
+      formData.append("timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
+
       const response = await fetch("/api/parse", {
         method: "POST",
         body: formData,

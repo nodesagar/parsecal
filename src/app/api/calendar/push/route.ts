@@ -133,10 +133,19 @@ export async function POST(request: Request) {
             for (const event of events) {
                 try {
                     const gEvent = convertToGoogleEvent(event, userTimezone);
-                    const res = await calendar.events.insert({
-                        calendarId: connection.calendar_id,
-                        requestBody: gEvent,
-                    });
+                    let res;
+                    if (event.external_event_id) {
+                        res = await calendar.events.update({
+                            calendarId: connection.calendar_id || 'primary',
+                            eventId: event.external_event_id,
+                            requestBody: gEvent,
+                        });
+                    } else {
+                        res = await calendar.events.insert({
+                            calendarId: connection.calendar_id || 'primary',
+                            requestBody: gEvent,
+                        });
+                    }
 
                     const { error: markPushedError } = await supabase
                         .from('parsed_events')
@@ -197,14 +206,33 @@ export async function POST(request: Request) {
 
             for (const event of events) {
                 try {
-                    const outlookEvent = convertToOutlookEvent(event);
+                    const outlookEvent = convertToOutlookEvent(event, userTimezone);
                     let res;
                     try {
-                        res = await createOutlookEvent(
-                            activeAccessToken,
-                            connection.calendar_id,
-                            outlookEvent
-                        );
+                        if (event.external_event_id) {
+                            // Update existing event
+                            const updatePath = `/me/events/${event.external_event_id}`;
+                            const updateRes = await fetch(`${MICROSOFT_GRAPH_BASE_URL}${updatePath}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    Authorization: `Bearer ${activeAccessToken}`,
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(outlookEvent),
+                            });
+                            if (!updateRes.ok) {
+                                // If update fails (maybe deleted in provider), fallback to create
+                                res = await createOutlookEvent(activeAccessToken, connection.calendar_id, outlookEvent);
+                            } else {
+                                res = await updateRes.json();
+                            }
+                        } else {
+                            res = await createOutlookEvent(
+                                activeAccessToken,
+                                connection.calendar_id,
+                                outlookEvent
+                            );
+                        }
                     } catch (firstPushError) {
                         const firstPushErrorMessage =
                             firstPushError instanceof Error ? firstPushError.message : String(firstPushError);

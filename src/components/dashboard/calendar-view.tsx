@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, X, Clock, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, X, Clock, MapPin, Trash2 } from "lucide-react";
 
 type Provider = "google" | "outlook";
 
@@ -58,6 +58,7 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<{ day: number; month: number; year: number } | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Set default provider to first connected calendar
   useEffect(() => {
@@ -95,6 +96,27 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
+
+  const deleteEvent = async () => {
+    if (!selectedEvent) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/calendar/events?provider=${selectedEvent.provider}&eventId=${selectedEvent.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete event");
+      }
+      setSelectedEvent(null);
+      fetchEvents(); // Refresh calendar after deletion
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Failed to delete event");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
@@ -213,7 +235,15 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
             {providerMeta && (
               <p className={`text-xs ${providerMeta.color} font-medium flex items-center gap-1.5`}>
                 {providerMeta.icon}
-                Viewing {providerMeta.label} Calendar
+                Viewing{" "}
+                <a 
+                  href={activeProvider === 'google' ? "https://calendar.google.com" : "https://outlook.live.com/calendar"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline underline-offset-2"
+                >
+                  {providerMeta.label} Calendar
+                </a>
               </p>
             )}
           </div>
@@ -435,7 +465,15 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
               )}
             </div>
             
-            <div className="p-4 bg-bg border-t border-border flex justify-end">
+            <div className="p-4 bg-bg border-t border-border flex justify-end gap-3">
+              <button 
+                onClick={deleteEvent}
+                disabled={isDeleting}
+                className="px-5 py-2.5 bg-[#ef4444]/10 hover:bg-[#ef4444]/20 border border-[#ef4444]/20 rounded-[12px] text-sm font-bold text-[#ef4444] transition-all active:scale-95 shadow-sm cursor-pointer flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                Delete
+              </button>
               <button 
                 onClick={() => setSelectedEvent(null)}
                 className="px-5 py-2.5 bg-white border border-border hover:border-border/80 hover:bg-bg-card rounded-[12px] text-sm font-bold text-text transition-all active:scale-95 shadow-sm cursor-pointer"
