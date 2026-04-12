@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Loader2, X, Clock, MapPin } from "lucide-react";
 
 type Provider = "google" | "outlook";
 
@@ -56,6 +56,8 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<{ day: number; month: number; year: number } | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   // Set default provider to first connected calendar
   useEffect(() => {
@@ -132,27 +134,38 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
 
   const days = [];
   for (let i = 0; i < startDay; i++) {
-    days.push(<div key={`empty-${i}`} className="h-[88px] border-b border-r border-border/30" />);
+    days.push(<div key={`empty-${i}`} className="h-[88px] border-b border-r border-border/30 bg-bg/10" />);
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
     const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
     const dayEvents = eventsByDay[d] || [];
+    const hasEvents = dayEvents.length > 0;
 
     days.push(
       <div
         key={d}
-        className={`h-[88px] border-b border-r border-border/30 p-1.5 transition-colors hover:bg-bg/40 relative ${isToday ? "bg-primary/[0.04]" : ""}`}
+        onClick={() => {
+          if (hasEvents) setSelectedDate({ day: d, month, year });
+        }}
+        className={`h-[88px] border-b border-r border-border/30 p-1.5 transition-all outline-none ${hasEvents ? "hover:bg-bg cursor-pointer hover:shadow-inner" : ""} relative ${isToday ? "bg-primary/[0.04]" : "bg-white"}`}
       >
-        <span
-          className={`text-[11px] font-semibold inline-flex items-center justify-center ${
-            isToday
-              ? "bg-primary text-white w-6 h-6 rounded-full"
-              : "text-text-muted w-6 h-6"
-          }`}
-        >
-          {d}
-        </span>
+        <div className="flex justify-between items-start">
+          <span
+            className={`text-[11px] font-semibold inline-flex items-center justify-center ${
+              isToday
+                ? "bg-primary text-white w-6 h-6 rounded-full shadow-sm"
+                : "text-text-muted w-6 h-6"
+            }`}
+          >
+            {d}
+          </span>
+          {hasEvents && (
+             <span className="text-[9px] font-medium text-text-muted/60 mt-1 mr-0.5" title={`${dayEvents.length} events`}>
+               {dayEvents.length}
+             </span>
+          )}
+        </div>
         <div className="mt-0.5 space-y-0.5 overflow-hidden max-h-[48px]">
           {dayEvents.slice(0, 2).map((event) => {
             const time = event.isAllDay
@@ -161,22 +174,26 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
             return (
               <div
                 key={event.id}
-                className={`text-[10px] px-1.5 py-0.5 rounded-[4px] truncate font-medium ${
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedEvent(event);
+                }}
+                className={`text-[10px] px-1.5 py-0.5 rounded-[4px] truncate font-medium hover:brightness-95 transition-all cursor-pointer ${
                   event.provider === "google"
                     ? "bg-[#1a73e8]/10 text-[#1a73e8] border border-[#1a73e8]/10"
                     : "bg-[#0072C6]/10 text-[#0072C6] border border-[#0072C6]/10"
                 }`}
                 title={`${event.title}${time ? ` at ${time}` : ""}${event.location ? ` — ${event.location}` : ""}`}
               >
-                {time ? `${time} ` : ""}
+                {time ? <span className="opacity-70 font-normal mr-0.5">{time}</span> : ""}
                 {event.title}
               </div>
             );
           })}
           {dayEvents.length > 2 && (
-            <span className="text-[9px] text-text-muted font-medium pl-1">
+            <div className="text-[9px] text-text-muted font-semibold pl-1 pt-0.5 hover:text-text transition-colors">
               +{dayEvents.length - 2} more
-            </span>
+            </div>
           )}
         </div>
       </div>
@@ -287,7 +304,148 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-7">{days}</div>
+      <div className="grid grid-cols-7 bg-white">{days}</div>
+
+      {/* Day Events Modal */}
+      {selectedDate && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/20 backdrop-blur-[2px] flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedDate(null)}
+        >
+          <div 
+            className="bg-bg-card border border-border rounded-[24px] shadow-2xl w-full max-w-md overflow-hidden relative flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-5 border-b border-border bg-bg/50">
+              <h3 className="font-bold text-lg text-text">
+                {new Date(selectedDate.year, selectedDate.month, selectedDate.day).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+              </h3>
+              <button 
+                onClick={() => setSelectedDate(null)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-bg hover:bg-border transition-colors text-text-muted hover:text-text"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="p-5 overflow-y-auto flex-1 space-y-3">
+              {(eventsByDay[selectedDate.day] || []).map((event) => {
+                const isGoogle = event.provider === "google";
+                const time = event.isAllDay ? "All Day" : new Date(event.start).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+                return (
+                  <div
+                    key={event.id}
+                    onClick={() => {
+                      setSelectedEvent(event);
+                    }}
+                    className={`p-3 rounded-[12px] border cursor-pointer hover:shadow-md transition-all group ${
+                      isGoogle 
+                        ? 'bg-[#1a73e8]/5 border-[#1a73e8]/20 hover:border-[#1a73e8]/40' 
+                        : 'bg-[#0072C6]/5 border-[#0072C6]/20 hover:border-[#0072C6]/40'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-1">
+                      <h4 className={`font-semibold text-sm ${isGoogle ? 'text-[#1a73e8]' : 'text-[#0072C6]'}`}>
+                        {event.title}
+                      </h4>
+                      <span className="text-[10px] font-bold bg-white px-2 py-0.5 rounded-[6px] border border-border shadow-sm text-text-muted whitespace-nowrap ml-3">
+                        {time}
+                      </span>
+                    </div>
+                    {event.location && (
+                      <div className="flex items-center gap-1.5 text-xs text-text-muted mt-2">
+                        <MapPin className="w-3 h-3 opacity-70" />
+                        <span className="truncate">{event.location}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <div 
+          className="fixed inset-0 z-[110] bg-black/20 backdrop-blur-[2px] flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div 
+            className="bg-bg-card border border-border rounded-[24px] shadow-2xl w-full max-w-sm overflow-hidden relative animate-in zoom-in-95 duration-200"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between p-6 border-b border-border bg-bg/50">
+              <div className="pr-4">
+                <h3 className="font-bold text-xl text-text leading-tight mb-2">
+                  {selectedEvent.title}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[6px] uppercase tracking-wider ${
+                    selectedEvent.provider === 'google' 
+                      ? 'bg-[#1a73e8]/10 text-[#1a73e8]' 
+                      : 'bg-[#0072C6]/10 text-[#0072C6]'
+                  }`}>
+                    {selectedEvent.provider}
+                  </span>
+                  {selectedEvent.isAllDay && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-[6px] bg-bg border border-border text-text-muted uppercase tracking-wider">
+                      All Day
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedEvent(null)}
+                className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-bg hover:bg-border transition-colors text-text-muted hover:text-text cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-[12px] bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10">
+                  <Clock className="w-5 h-5 text-primary" />
+                </div>
+                <div className="pt-0.5">
+                  <p className="text-sm font-semibold text-text">
+                    {new Date(selectedEvent.start).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                  </p>
+                  {!selectedEvent.isAllDay && (
+                    <p className="text-sm text-text-muted mt-0.5">
+                      {new Date(selectedEvent.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                      {" - "}
+                      {new Date(selectedEvent.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {selectedEvent.location && (
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-[12px] bg-primary/5 flex items-center justify-center shrink-0 border border-primary/10">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="pt-2">
+                    <p className="text-sm text-text leading-snug">{selectedEvent.location}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 bg-bg border-t border-border flex justify-end">
+              <button 
+                onClick={() => setSelectedEvent(null)}
+                className="px-5 py-2.5 bg-white border border-border hover:border-border/80 hover:bg-bg-card rounded-[12px] text-sm font-bold text-text transition-all active:scale-95 shadow-sm cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
