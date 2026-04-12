@@ -6,7 +6,11 @@ function trimTrailingSlash(value: string) {
 }
 
 function resolveGoogleRedirectUri(requestUrl?: string) {
-    const explicitRedirectUri = process.env.GOOGLE_REDIRECT_URI?.trim();
+    // Prefer calendar-specific redirect URI, fall back to generic
+    const explicitRedirectUri = (
+        process.env.GOOGLE_CALENDAR_REDIRECT_URI?.trim() ||
+        process.env.GOOGLE_REDIRECT_URI?.trim()
+    );
     if (explicitRedirectUri) {
         return explicitRedirectUri;
     }

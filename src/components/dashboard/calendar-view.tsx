@@ -262,9 +262,18 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
       {error && (
         <div className="flex items-center justify-center gap-2 py-3 bg-error/5 border-b border-error/10 text-xs text-error">
           {error}
-          <button onClick={fetchEvents} className="underline font-semibold">
-            Retry
-          </button>
+          {(error.toLowerCase().includes('reconnect') || error.toLowerCase().includes('revoked') || error.toLowerCase().includes('expired')) ? (
+            <a
+              href={`/api/auth/calendar/${activeProvider}/init?next=%2Fdashboard`}
+              className="underline font-semibold ml-1"
+            >
+              Reconnect
+            </a>
+          ) : (
+            <button onClick={fetchEvents} className="underline font-semibold ml-1">
+              Retry
+            </button>
+          )}
         </div>
       )}
 

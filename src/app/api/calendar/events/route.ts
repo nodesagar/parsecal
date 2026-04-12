@@ -81,20 +81,52 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ events, provider });
     } catch (error) {
         console.error('Calendar events fetch error:', error);
-        return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
+        const message = error instanceof Error ? error.message : 'Failed to fetch events';
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchGoogleEvents(connection: any, startDate: Date, endDate: Date, requestUrl: string, supabase: any): Promise<CalendarEvent[]> {
     const oauth2Client = getGoogleOAuthClient(requestUrl);
+
+    let accessToken = connection.access_token;
+
+    // Proactively refresh if expired or about to expire (within 60 seconds)
+    const tokenExpiresAt = new Date(connection.token_expires_at).getTime();
+    const needsRefresh = tokenExpiresAt <= Date.now() + 60_000;
+
+    if (needsRefresh && connection.refresh_token) {
+        try {
+            oauth2Client.setCredentials({ refresh_token: connection.refresh_token });
+            const { credentials } = await oauth2Client.refreshAccessToken();
+            accessToken = credentials.access_token ?? accessToken;
+
+            const expiresAt = new Date();
+            if (credentials.expiry_date) expiresAt.setTime(credentials.expiry_date);
+            else expiresAt.setHours(expiresAt.getHours() + 1);
+
+            await supabase
+                .from('connected_calendars')
+                .update({
+                    access_token: accessToken,
+                    ...(credentials.refresh_token ? { refresh_token: credentials.refresh_token } : {}),
+                    token_expires_at: expiresAt.toISOString(),
+                })
+                .eq('id', connection.id);
+        } catch (err) {
+            console.error('Failed to refresh Google token:', err);
+            throw new Error('Google token expired. Please reconnect your Google Calendar.');
+        }
+    }
+
     oauth2Client.setCredentials({
-        access_token: connection.access_token,
+        access_token: accessToken,
         refresh_token: connection.refresh_token,
-        expiry_date: new Date(connection.token_expires_at).getTime(),
+        expiry_date: needsRefresh ? undefined : tokenExpiresAt,
     });
 
-    // Auto-persist refreshed tokens
+    // Auto-persist any tokens refreshed mid-call
     oauth2Client.on('tokens', async (tokens) => {
         if (tokens.access_token) {
             const expiresAt = new Date();
@@ -114,14 +146,25 @@ async function fetchGoogleEvents(connection: any, startDate: Date, endDate: Date
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-    const res = await calendar.events.list({
-        calendarId: connection.calendar_id || 'primary',
-        timeMin: startDate.toISOString(),
-        timeMax: endDate.toISOString(),
-        singleEvents: true,
-        orderBy: 'startTime',
-        maxResults: 250,
-    });
+    let res;
+    try {
+        res = await calendar.events.list({
+            calendarId: connection.calendar_id || 'primary',
+            timeMin: startDate.toISOString(),
+            timeMax: endDate.toISOString(),
+            singleEvents: true,
+            orderBy: 'startTime',
+            maxResults: 250,
+        });
+    } catch (err: unknown) {
+        const gaxiosErr = err as { response?: { status?: number; data?: unknown } };
+        const status = gaxiosErr?.response?.status;
+        if (status === 401 || status === 403) {
+            console.error('Google Calendar auth error — token invalid:', gaxiosErr?.response?.data);
+            throw new Error('Google Calendar access was revoked. Please reconnect your Google Calendar.');
+        }
+        throw err;
+    }
 
     const items = res.data.items || [];
 
