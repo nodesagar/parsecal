@@ -19,13 +19,22 @@ import {
 } from "lucide-react";
 
 type Tab = "dashboard" | "parses" | "connected";
+type PreviewProvider = "google" | "outlook";
 
-const MOCK_EVENTS = [
-  { id: "1", title: "Product Sync", start: "2026-04-13T10:00:00", provider: "google" as "google" | "outlook", location: "Meeting Room A" },
-  { id: "2", title: "Design Review", start: "2026-04-14T14:30:00", provider: "google" as "google" | "outlook", location: "Zoom" },
-  { id: "3", title: "Weekly Planning", start: "2026-04-15T09:00:00", provider: "google" as "google" | "outlook", location: "Main Office" },
-  { id: "4", title: "Client Call", start: "2026-04-16T16:00:00", provider: "google" as "google" | "outlook", location: "Phone" },
-  { id: "5", title: "Team Lunch", start: "2026-04-17T12:00:00", provider: "google" as "google" | "outlook", location: "The Bistro" },
+interface PreviewEvent {
+  id: string;
+  title: string;
+  start: string;
+  provider: PreviewProvider;
+  location: string;
+}
+
+const EVENT_TEMPLATES = [
+  { id: "1", title: "Product Sync", day: 5, hour: 10, minute: 0, location: "Meeting Room A" },
+  { id: "2", title: "Design Review", day: 9, hour: 14, minute: 30, location: "Zoom" },
+  { id: "3", title: "Weekly Planning", day: 13, hour: 9, minute: 0, location: "Main Office" },
+  { id: "4", title: "Client Call", day: 18, hour: 16, minute: 0, location: "Phone" },
+  { id: "5", title: "Team Lunch", day: 23, hour: 12, minute: 0, location: "The Bistro" },
 ];
 
 const MOCK_SESSIONS = [
@@ -63,31 +72,64 @@ const MOCK_SESSIONS = [
   },
 ];
 
+function toLocalDateTime(year: number, month: number, day: number, hour: number, minute: number) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`;
+}
+
+function buildMockEvents(year: number, month: number, provider: PreviewProvider): PreviewEvent[] {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  return EVENT_TEMPLATES.map((template) => {
+    const day = Math.min(template.day, daysInMonth);
+    return {
+      id: `${provider}-${template.id}`,
+      title: provider === "google" ? template.title : `[Outlook] ${template.title}`,
+      start: toLocalDateTime(year, month, day, template.hour, template.minute),
+      provider,
+      location: template.location,
+    };
+  });
+}
+
 export default function DashboardPreview() {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
-  const [provider, setProvider] = useState<"google" | "outlook">("google");
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 1)); // April 2026
+  const [provider, setProvider] = useState<PreviewProvider>("google");
+  const [currentDate, setCurrentDate] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [filter, setFilter] = useState<"all" | "draft">("all");
-  const [selectedEvent, setSelectedEvent] = useState<typeof MOCK_EVENTS[0] | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<PreviewEvent | null>(null);
   const [isNewParseOpen, setIsNewParseOpen] = useState(false);
 
   const monthName = currentDate.toLocaleString("default", { month: "long" });
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  const today = new Date();
 
   const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
-  const goToday = () => setCurrentDate(new Date(2026, 3, 6));
+  const goToday = () => {
+    const now = new Date();
+    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+  };
 
   const filteredSessions = useMemo(() => {
     if (filter === "all") return MOCK_SESSIONS.slice(0, 2);
     return MOCK_SESSIONS.filter(s => s.status === "draft");
   }, [filter]);
 
-  const providerEvents = useMemo(() => {
-    if (provider === "google") return MOCK_EVENTS;
-    return MOCK_EVENTS.map(e => ({ ...e, title: `[Outlook] ${e.title}`, provider: "outlook" as const }));
-  }, [provider]);
+  const providerEvents = useMemo(
+    () => buildMockEvents(year, month, provider),
+    [provider, year, month],
+  );
+
+  const eventsByDay = useMemo(() => {
+    const map = new Map<number, PreviewEvent>();
+    providerEvents.forEach((event) => {
+      map.set(new Date(event.start).getDate(), event);
+    });
+    return map;
+  }, [providerEvents]);
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6 text-left relative min-h-[520px]">
@@ -158,7 +200,7 @@ export default function DashboardPreview() {
                   <div className="flex items-center gap-1 bg-border/20 p-1 rounded-xl">
                     <button 
                       onClick={() => setProvider("google")}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'google' ? 'bg-white shadow-md border border-border text-[#4285F4]' : 'text-text-muted hover:text-text'}`}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'google' ? 'bg-bg-card shadow-md border border-border text-[#4285F4] dark:text-[#9bc3ff]' : 'text-text-muted hover:text-text'}`}
                     >
                       <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -170,7 +212,7 @@ export default function DashboardPreview() {
                     </button>
                     <button 
                       onClick={() => setProvider("outlook")}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'outlook' ? 'bg-white shadow-md border border-border text-[#0078d4]' : 'text-text-muted hover:text-text'}`}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${provider === 'outlook' ? 'bg-bg-card shadow-md border border-border text-[#0078d4] dark:text-[#9ed6ff]' : 'text-text-muted hover:text-text'}`}
                     >
                       <svg className="w-3.5 h-3.5" viewBox="60 90.4 570.02 539.67" xmlns="http://www.w3.org/2000/svg">
                         <defs>
@@ -202,9 +244,9 @@ export default function DashboardPreview() {
                   </div>
 
                   <div className="flex items-center gap-1 bg-border/20 p-1 rounded-xl">
-                    <button onClick={prevMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronLeft className="w-3 h-3" /></button>
-                    <button onClick={goToday} className="p-1 px-3 border border-border bg-white rounded-[8px] text-[10px] font-bold shadow-sm hover:bg-bg transition-colors active:scale-95 uppercase tracking-tighter">Today</button>
-                    <button onClick={nextMonth} className="p-1.5 border border-border bg-white rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronRight className="w-3 h-3" /></button>
+                    <button onClick={prevMonth} className="p-1.5 border border-border bg-bg-card text-text rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronLeft className="w-3 h-3" /></button>
+                    <button onClick={goToday} className="p-1 px-3 border border-border bg-bg-card text-text rounded-[8px] text-[10px] font-bold shadow-sm hover:bg-bg transition-colors active:scale-95 uppercase tracking-tighter">Today</button>
+                    <button onClick={nextMonth} className="p-1.5 border border-border bg-bg-card text-text rounded-[8px] shadow-sm hover:bg-bg transition-colors active:scale-95"><ChevronRight className="w-3 h-3" /></button>
                   </div>
                 </div>
               </div>
@@ -218,13 +260,14 @@ export default function DashboardPreview() {
               </div>
 
               <div className="grid grid-cols-7">
-                {Array.from({ length: 35 }).map((_, i) => {
+                {Array.from({ length: Math.ceil((new Date(year, month, 1).getDay() + new Date(year, month + 1, 0).getDate()) / 7) * 7 }).map((_, i) => {
                   const startDayOffset = new Date(year, month, 1).getDay();
                   const day = i - startDayOffset + 1;
                   const daysInMonth = new Date(year, month + 1, 0).getDate();
                   const isCurrentMonth = day > 0 && day <= daysInMonth;
-                  const hasEvents = isCurrentMonth && month === 3 && [13, 14, 15, 16, 17].includes(day);
-                  const isToday = day === 6 && month === 3;
+                  const eventForDay = isCurrentMonth ? eventsByDay.get(day) ?? null : null;
+                  const hasEvents = Boolean(eventForDay);
+                  const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
                   return (
                     <div key={i} className={`h-[80px] border-b border-r border-border/20 p-1 relative transition-all duration-300 hover:bg-primary/[0.02] ${isCurrentMonth ? '' : 'bg-bg/20 opacity-40'} ${isToday ? 'bg-primary/[0.04]' : ''}`}>
@@ -236,10 +279,10 @@ export default function DashboardPreview() {
                       {hasEvents && (
                         <div className="mt-1 space-y-0.5 animate-in fade-in zoom-in-95 duration-300">
                           <button 
-                            onClick={() => setSelectedEvent(providerEvents.find(e => new Date(e.start).getDate() === day) || null)}
+                            onClick={() => setSelectedEvent(eventForDay)}
                             className={`w-full text-left text-[8px] font-bold px-1.5 py-1 rounded-md truncate border transition-all active:scale-95 ${provider === 'google' ? 'bg-[#4285F4]/10 text-[#4285F4] border-[#4285F4]/10 hover:bg-[#4285F4]/20' : 'bg-[#0078d4]/10 text-[#0078d4] border-[#0078d4]/10 hover:bg-[#0078d4]/20'}`}
                           >
-                            {providerEvents.find(e => new Date(e.start).getDate() === day)?.title}
+                            {eventForDay?.title}
                           </button>
                         </div>
                       )}
@@ -252,7 +295,7 @@ export default function DashboardPreview() {
                 <div className="absolute bottom-4 left-4 right-4 bg-bg-card border border-primary/20 rounded-2xl p-4 shadow-xl animate-in slide-in-from-bottom-4 transition-all z-20">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${provider === 'google' ? 'bg-[#4285F4]' : 'bg-[#0078d4]'}`} />
+                      <div className={`w-2 h-2 rounded-full ${selectedEvent.provider === 'google' ? 'bg-[#4285F4]' : 'bg-[#0078d4]'}`} />
                       <h4 className="text-sm font-bold text-text">{selectedEvent.title}</h4>
                     </div>
                     <button onClick={() => setSelectedEvent(null)}>
@@ -265,7 +308,7 @@ export default function DashboardPreview() {
                       {new Date(selectedEvent.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <span className={`font-bold ${provider === 'google' ? 'text-[#4285F4]' : 'text-[#0078d4]'}`}>@</span>
+                      <span className={`font-bold ${selectedEvent.provider === 'google' ? 'text-[#4285F4]' : 'text-[#0078d4]'}`}>@</span>
                       {selectedEvent.location}
                     </span>
                   </div>
@@ -284,13 +327,13 @@ export default function DashboardPreview() {
                    <div className="flex items-center gap-1 bg-bg border border-border p-0.5 rounded-xl shadow-inner">
                      <button 
                       onClick={() => setFilter("all")}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "all" ? 'bg-white shadow-sm border border-border text-primary' : 'text-text-muted hover:text-text'}`}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "all" ? 'bg-bg-card shadow-sm border border-border text-primary' : 'text-text-muted hover:text-text'}`}
                      >
                        All
                      </button>
                      <button 
                       onClick={() => setFilter("draft")}
-                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "draft" ? 'bg-white shadow-sm border border-border text-warning' : 'text-text-muted hover:text-text'}`}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold transition-all ${filter === "draft" ? 'bg-bg-card shadow-sm border border-border text-warning' : 'text-text-muted hover:text-text'}`}
                      >
                        Draft
                      </button>
