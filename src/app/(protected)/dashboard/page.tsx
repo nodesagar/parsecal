@@ -79,7 +79,7 @@ export default async function DashboardPage() {
 
             {/* Calendar Connect Shortcut */}
             {showAnyCta && (
-                <div className="group bg-linear-to-br from-white to-bg border border-border/80 hover:border-primary/30 rounded-[20px] p-6 mb-8 shadow-[0_4px_24px_-10px_rgba(0,0,0,0.05)] transition-all overflow-hidden relative">
+                <div className="group bg-linear-to-br from-bg-card to-bg border border-border/80 hover:border-primary/30 rounded-[20px] p-6 mb-8 shadow-[0_4px_24px_-10px_rgba(0,0,0,0.05)] transition-all overflow-hidden relative">
                     <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-48 h-48 bg-primary/5 rounded-full blur-[80px]" />
                     <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-start gap-4">
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
                             {showGoogleCta && (
                                 <Link
                                     href="/api/auth/calendar/google/init?next=%2Fdashboard"
-                                    className="group/btn flex items-center gap-3 bg-white border border-border/80 hover:border-primary/50 hover:shadow-lg text-text font-bold px-5 py-3.5 rounded-[16px] text-sm transition-all active:scale-[0.97] min-w-[170px] md:max-w-[200px]"
+                                    className="group/btn flex items-center gap-3 bg-bg-card border border-border/80 hover:border-primary/50 hover:shadow-lg text-text font-bold px-5 py-3.5 rounded-[16px] text-sm transition-all active:scale-[0.97] min-w-[170px] md:max-w-[200px]"
                                 >
                                     <div className="w-8 h-8 rounded-[10px] bg-bg flex items-center justify-center shrink-0 border border-border/40 group-hover/btn:scale-110 transition-transform">
                                         <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -120,14 +120,14 @@ export default async function DashboardPage() {
                             {showOutlookCta && (
                                 <Link
                                     href="/api/auth/calendar/outlook/init?next=%2Fdashboard"
-                                    className="group/btn flex items-center gap-3 bg-[#0072C6]/5 hover:bg-[#0072C6]/10 border border-[#0072C6]/20 hover:border-[#0072C6]/40 hover:shadow-lg text-[#0060ac] font-bold px-5 py-3.5 rounded-[16px] text-sm transition-all active:scale-[0.97] min-w-[170px] md:max-w-[200px]"
+                                    className="group/btn flex items-center gap-3 bg-[#0072C6]/5 hover:bg-[#0072C6]/10 border border-[#0072C6]/20 hover:border-[#0072C6]/40 hover:shadow-lg text-[#0060ac] dark:text-[#9ed6ff] dark:bg-[#7fc8ff]/15 dark:hover:bg-[#7fc8ff]/25 dark:border-[#7fc8ff]/35 dark:hover:border-[#7fc8ff]/50 font-bold px-5 py-3.5 rounded-[16px] text-sm transition-all active:scale-[0.97] min-w-[170px] md:max-w-[200px]"
                                 >
-                                    <div className="w-8 h-8 rounded-[10px] bg-white flex items-center justify-center shrink-0 border border-[#0072C6]/10 group-hover/btn:scale-110 transition-transform">
+                                    <div className="w-8 h-8 rounded-[10px] bg-bg-card flex items-center justify-center shrink-0 border border-[#0072C6]/10 dark:border-[#7fc8ff]/30 group-hover/btn:scale-110 transition-transform">
                                         <img src="/icons/outlook.svg" alt="Outlook" className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col items-start leading-tight">
                                         <span className="text-[13px]">Outlook</span>
-                                        <span className="text-[10px] text-[#0060ac]/70 font-medium">Auto-Sync</span>
+                                        <span className="text-[10px] text-[#0060ac]/70 dark:text-[#9ed6ff]/75 font-medium">Auto-Sync</span>
                                     </div>
                                 </Link>
                             )}

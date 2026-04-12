@@ -27,9 +27,9 @@ interface CalendarViewProps {
 const PROVIDER_META: Record<Provider, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
   google: {
     label: "Google",
-    color: "text-[#1a73e8]",
-    bg: "bg-[#1a73e8]/10",
-    border: "border-[#1a73e8]/20",
+    color: "text-[#1a73e8] dark:text-[#9bc3ff]",
+    bg: "bg-[#1a73e8]/10 dark:bg-[#8ab4f8]/20",
+    border: "border-[#1a73e8]/20 dark:border-[#8ab4f8]/30",
     icon: (
       <svg className="w-4 h-4" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -41,9 +41,9 @@ const PROVIDER_META: Record<Provider, { label: string; color: string; bg: string
   },
   outlook: {
     label: "Outlook",
-    color: "text-[#0072C6]",
-    bg: "bg-[#0072C6]/10",
-    border: "border-[#0072C6]/20",
+    color: "text-[#0072C6] dark:text-[#9ed6ff]",
+    bg: "bg-[#0072C6]/10 dark:bg-[#7fc8ff]/20",
+    border: "border-[#0072C6]/20 dark:border-[#7fc8ff]/30",
     icon: (
       <img src="/icons/outlook.svg" alt="Outlook" className="w-4 h-4" />
     ),
@@ -156,7 +156,7 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
 
   const days = [];
   for (let i = 0; i < startDay; i++) {
-    days.push(<div key={`empty-${i}`} className="h-[88px] border-b border-r border-border/30 bg-bg/10" />);
+    days.push(<div key={`empty-${i}`} className="h-[88px] border-b border-r border-border/30 bg-bg" />);
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
@@ -170,7 +170,7 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
         onClick={() => {
           if (hasEvents) setSelectedDate({ day: d, month, year });
         }}
-        className={`h-[88px] border-b border-r border-border/30 p-1.5 transition-all outline-none ${hasEvents ? "hover:bg-bg cursor-pointer hover:shadow-inner" : ""} relative ${isToday ? "bg-primary/[0.04]" : "bg-white"}`}
+        className={`h-[88px] border-b border-r border-border/30 p-1.5 transition-all outline-none ${hasEvents ? "hover:bg-bg/80 cursor-pointer hover:shadow-inner" : ""} relative ${isToday ? "bg-primary/[0.12]" : "bg-bg-card"}`}
       >
         <div className="flex justify-between items-start">
           <span
@@ -202,8 +202,8 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
                 }}
                 className={`text-[10px] px-1.5 py-0.5 rounded-[4px] truncate font-medium hover:brightness-95 transition-all cursor-pointer ${
                   event.provider === "google"
-                    ? "bg-[#1a73e8]/10 text-[#1a73e8] border border-[#1a73e8]/10"
-                    : "bg-[#0072C6]/10 text-[#0072C6] border border-[#0072C6]/10"
+                    ? "bg-[#1a73e8]/10 text-[#1a73e8] border border-[#1a73e8]/10 dark:bg-[#8ab4f8]/20 dark:text-[#d5e7ff] dark:border-[#8ab4f8]/30"
+                    : "bg-[#0072C6]/10 text-[#0072C6] border border-[#0072C6]/10 dark:bg-[#7fc8ff]/20 dark:text-[#c7e8ff] dark:border-[#7fc8ff]/30"
                 }`}
                 title={`${event.title}${time ? ` at ${time}` : ""}${event.location ? ` — ${event.location}` : ""}`}
               >
@@ -262,7 +262,7 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
                     onClick={() => setActiveProvider(cal.provider)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-xs font-semibold transition-all ${
                       isActive
-                        ? `bg-white shadow-sm ${meta.color} border ${meta.border}`
+                        ? `bg-bg-card shadow-sm ring-1 ring-border/70 ${meta.color} border ${meta.border}`
                         : "text-text-muted hover:text-text"
                     }`}
                   >
@@ -334,7 +334,7 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-7 bg-white">{days}</div>
+      <div className="grid grid-cols-7 bg-bg">{days}</div>
 
       {/* Day Events Modal */}
       {selectedDate && (
@@ -370,15 +370,15 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
                     }}
                     className={`p-3 rounded-[12px] border cursor-pointer hover:shadow-md transition-all group ${
                       isGoogle 
-                        ? 'bg-[#1a73e8]/5 border-[#1a73e8]/20 hover:border-[#1a73e8]/40' 
-                        : 'bg-[#0072C6]/5 border-[#0072C6]/20 hover:border-[#0072C6]/40'
+                        ? 'bg-[#1a73e8]/5 border-[#1a73e8]/20 hover:border-[#1a73e8]/40 dark:bg-[#8ab4f8]/15 dark:border-[#8ab4f8]/30 dark:hover:border-[#8ab4f8]/45' 
+                        : 'bg-[#0072C6]/5 border-[#0072C6]/20 hover:border-[#0072C6]/40 dark:bg-[#7fc8ff]/15 dark:border-[#7fc8ff]/30 dark:hover:border-[#7fc8ff]/45'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <h4 className={`font-semibold text-sm ${isGoogle ? 'text-[#1a73e8]' : 'text-[#0072C6]'}`}>
+                      <h4 className={`font-semibold text-sm ${isGoogle ? 'text-[#1a73e8] dark:text-[#d5e7ff]' : 'text-[#0072C6] dark:text-[#c7e8ff]'}`}>
                         {event.title}
                       </h4>
-                      <span className="text-[10px] font-bold bg-white px-2 py-0.5 rounded-[6px] border border-border shadow-sm text-text-muted whitespace-nowrap ml-3">
+                      <span className="text-[10px] font-bold bg-bg px-2 py-0.5 rounded-[6px] border border-border shadow-sm text-text-muted whitespace-nowrap ml-3">
                         {time}
                       </span>
                     </div>
@@ -414,8 +414,8 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
                 <div className="flex items-center gap-2">
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-[6px] uppercase tracking-wider ${
                     selectedEvent.provider === 'google' 
-                      ? 'bg-[#1a73e8]/10 text-[#1a73e8]' 
-                      : 'bg-[#0072C6]/10 text-[#0072C6]'
+                      ? 'bg-[#1a73e8]/10 text-[#1a73e8] dark:bg-[#8ab4f8]/20 dark:text-[#d5e7ff]' 
+                      : 'bg-[#0072C6]/10 text-[#0072C6] dark:bg-[#7fc8ff]/20 dark:text-[#c7e8ff]'
                   }`}>
                     {selectedEvent.provider}
                   </span>
@@ -476,7 +476,7 @@ export default function CalendarView({ connectedCalendars }: CalendarViewProps) 
               </button>
               <button 
                 onClick={() => setSelectedEvent(null)}
-                className="px-5 py-2.5 bg-white border border-border hover:border-border/80 hover:bg-bg-card rounded-[12px] text-sm font-bold text-text transition-all active:scale-95 shadow-sm cursor-pointer"
+                className="px-5 py-2.5 bg-bg-card border border-border hover:border-border/80 hover:bg-bg rounded-[12px] text-sm font-bold text-text transition-all active:scale-95 shadow-sm cursor-pointer"
               >
                 Close
               </button>
