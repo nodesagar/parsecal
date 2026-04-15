@@ -10,6 +10,7 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 
 export const maxDuration = 60;
+const MICROSOFT_GRAPH_BASE_URL = 'https://graph.microsoft.com/v1.0';
 type PushProvider = 'google' | 'outlook';
 
 function isSupportedProvider(value: string): value is PushProvider {

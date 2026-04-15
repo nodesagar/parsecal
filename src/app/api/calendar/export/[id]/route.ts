@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { addDaysToIsoDate, extractIsoDate } from '@/lib/calendar/google';
+import { addDaysToIsoDate, extractLocalIsoDate } from '@/lib/calendar/google';
 import { NextResponse } from 'next/server';
 import ical, { ICalCalendarMethod } from 'ical-generator';
 
@@ -58,10 +58,10 @@ export async function GET(
         for (const event of events) {
             const allDayRange = event.is_all_day
                 ? {
-                    start: new Date(`${extractIsoDate(event.start_datetime)}T00:00:00.000Z`),
+                    start: new Date(`${extractLocalIsoDate(event.start_datetime)}T00:00:00.000Z`),
                     end: new Date(
                         `${addDaysToIsoDate(
-                            event.end_datetime ? extractIsoDate(event.end_datetime) : extractIsoDate(event.start_datetime),
+                            event.end_datetime ? extractLocalIsoDate(event.end_datetime) : extractLocalIsoDate(event.start_datetime),
                             1
                         )}T00:00:00.000Z`
                     ),
