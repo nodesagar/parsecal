@@ -10,10 +10,13 @@ import {
   Calendar,
   Clock,
   Link2,
+  Plus,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/parse/new", label: "New Parse", icon: Plus },
   { href: "/history", label: "History", icon: Clock },
   { href: "/calendars", label: "Connections", icon: Link2 },
   { href: "/settings", label: "Settings", icon: Settings },
@@ -55,11 +58,10 @@ export default function ProtectedLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-medium cursor-pointer ${
-                  isActive
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-medium cursor-pointer ${isActive
                     ? "bg-primary/10 text-primary"
                     : "text-text-muted hover:bg-bg hover:text-text"
-                }`}
+                  }`}
               >
                 <item.icon className="w-5 h-5" />
                 {item.label}
@@ -68,14 +70,17 @@ export default function ProtectedLayout({
           })}
         </nav>
 
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-medium text-text-muted hover:bg-bg hover:text-error cursor-pointer w-full"
-        >
-          <LogOut className="w-5 h-5" />
-          Sign Out
-        </button>
+        {/* Theme & Logout */}
+        <div className="space-y-4 pt-4 border-t border-border">
+          <ThemeToggle />
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm font-medium text-text-muted hover:bg-bg hover:text-error cursor-pointer w-full transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            Sign Out
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -89,9 +94,8 @@ export default function ProtectedLayout({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-[10px] cursor-pointer ${
-                isActive ? "text-primary" : "text-text-muted"
-              }`}
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-[10px] cursor-pointer ${isActive ? "text-primary" : "text-text-muted"
+                }`}
             >
               <item.icon className="w-5 h-5" />
               <span className="text-[10px] font-medium">{item.label}</span>
