@@ -39,6 +39,7 @@ export type Profile = {
   monthly_parse_count: number;
   monthly_parse_reset_at: string;
   time_format: "12h" | "24h";
+  theme_preference: "light" | "dark" | "system";
   default_event_duration: number;
   default_reminder: number;
   created_at: string;

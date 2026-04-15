@@ -193,7 +193,7 @@ export default function LandingPage() {
             ].map((item) => (
               <div key={item.step} className="flex flex-col items-center text-center group">
                 <div className={`relative w-24 h-24 bg-bg-card border-2 ${item.borderColor} rounded-[32px] flex items-center justify-center mb-8 ${item.shadow} shadow-xl group-hover:-rotate-3 transition-all duration-500`}>
-                   <div className="absolute -top-3 -right-3 bg-white border border-border px-2 py-1 rounded-lg text-[10px] font-black text-text shadow-sm">
+                   <div className="absolute -top-3 -right-3 bg-bg-card border border-border px-2 py-1 rounded-lg text-[10px] font-black text-text shadow-sm">
                       {item.step}
                    </div>
                    <item.icon className={`w-10 h-10 ${item.color}`} />

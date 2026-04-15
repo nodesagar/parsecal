@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { GOOGLE_CALENDAR_INTEGRATION_ENABLED } from '@/lib/features';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { ParseSession, ParsedEvent } from '@/types';
 import {
@@ -48,6 +48,7 @@ function ConfidenceBadge({ confidence }: { confidence: number }) {
 
 export default function ReviewPage() {
     const params = useParams();
+    const router = useRouter();
     const sessionId = params.id as string;
     const supabase = createClient();
 
@@ -145,6 +146,21 @@ export default function ReviewPage() {
 
         setEvents((prev) => prev.filter((e) => e.id !== eventId));
         await supabase.from('parsed_events').delete().eq('id', eventId);
+
+        // Update session event count
+        if (session) {
+            const newCount = Math.max(0, session.event_count - 1);
+            if (newCount === 0) {
+                // If no events left, delete the entire session
+                await supabase.from('parse_sessions').delete().eq('id', sessionId);
+                router.refresh();
+                router.push('/dashboard');
+                return;
+            }
+            setSession({ ...session, event_count: newCount });
+            await supabase.from('parse_sessions').update({ event_count: newCount }).eq('id', sessionId);
+            router.refresh();
+        }
     }
 
     function startEdit(event: ParsedEvent) {
@@ -211,6 +227,7 @@ export default function ReviewPage() {
             )
         );
         setEditingId(null);
+        router.refresh();
     }
 
     async function handleExportICS() {
@@ -291,12 +308,13 @@ export default function ReviewPage() {
         <div className="p-6 md:p-8 max-w-4xl mx-auto">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-                <Link
-                    href="/dashboard"
-                    className="w-8 h-8 flex items-center justify-center rounded-[10px] bg-bg border border-border hover:border-primary cursor-pointer"
+                <button
+                    onClick={() => router.back()}
+                    className="w-8 h-8 flex items-center justify-center rounded-[10px] bg-bg border border-border hover:border-primary cursor-pointer transition-colors"
+                    title="Go back"
                 >
                     <ArrowLeft className="w-4 h-4 text-text-muted" />
-                </Link>
+                </button>
                 <div className="flex-1 min-w-0">
                     {editingTitle ? (
                         <div className="flex items-center gap-2">
@@ -822,12 +840,12 @@ export default function ReviewPage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Link
-                            href="/dashboard"
+                        <button
+                            onClick={() => router.back()}
                             className="bg-bg text-text-muted hover:text-text font-medium px-4 py-2 rounded-[10px] border border-border hover:border-border-focus cursor-pointer text-sm"
                         >
-                            Back to Dashboard
-                        </Link>
+                            Back
+                        </button>
                         <a
                             href={
                                 selectedProvider === 'google'

@@ -126,7 +126,7 @@ function CalendarsContent() {
       {/* Connection Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Google Calendar Card */}
-        <div className={`relative bg-white border rounded-[28px] p-8 transition-all shadow-xs ${googleConnected ? 'border-primary/20 bg-primary/[0.01]' : 'border-border/60 border-dashed'}`}>
+        <div className={`relative bg-bg-card border rounded-[28px] p-8 transition-all shadow-xs ${googleConnected ? 'border-primary/20 bg-primary/[0.01]' : 'border-border/60 border-dashed'}`}>
           {googleConnected && (
             <div className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/20">
                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
@@ -171,7 +171,7 @@ function CalendarsContent() {
         </div>
 
         {/* Outlook Calendar Card */}
-        <div className={`relative bg-white border rounded-[28px] p-8 transition-all shadow-xs ${outlookConnected ? 'border-primary/20 bg-primary/[0.01]' : 'border-border/60 border-dashed'}`}>
+        <div className={`relative bg-bg-card border rounded-[28px] p-8 transition-all shadow-xs ${outlookConnected ? 'border-primary/20 bg-primary/[0.01]' : 'border-border/60 border-dashed'}`}>
           {outlookConnected && (
             <div className="absolute top-6 right-6 flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 border border-success/20">
                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
@@ -201,7 +201,7 @@ function CalendarsContent() {
               ) : (
                 <button
                   onClick={handleConnectOutlook}
-                  className="px-8 py-3 rounded-[12px] bg-white border border-border hover:border-primary/30 text-text text-sm font-bold shadow-xs hover:bg-bg transition-all active:scale-[0.98] cursor-pointer"
+                  className="px-8 py-3 rounded-[12px] bg-bg-card border border-border hover:border-primary/30 text-text text-sm font-bold shadow-xs hover:bg-bg transition-all active:scale-[0.98] cursor-pointer"
                 >
                   Link Calendar
                 </button>
@@ -216,7 +216,7 @@ function CalendarsContent() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-warning/10 rounded-[14px] flex items-center justify-center shrink-0">
-               <div className="p-2 bg-white rounded-[10px] shadow-xs">
+               <div className="p-2 bg-bg-card rounded-[10px] shadow-xs">
                   <svg className="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
