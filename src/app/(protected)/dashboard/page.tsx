@@ -67,7 +67,7 @@ export default async function DashboardPage() {
                 </div>
                 <Link
                     href="/parse/new"
-                    className="inline-flex items-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-6 py-3 rounded-[12px] text-sm shadow-sm transition-all active:scale-[0.97]"
+                    className="inline-flex items-center gap-2 bg-cta hover:bg-cta-hover text-white font-semibold px-6 py-3 rounded-xl text-sm shadow-sm transition-all active:scale-[0.97]"
                 >
                     <Plus className="w-5 h-5" />
                     New Parse
@@ -79,11 +79,11 @@ export default async function DashboardPage() {
 
             {/* Calendar Connect Shortcut */}
             {showAnyCta && (
-                <div className="group bg-linear-to-br from-bg-card to-bg border border-border/80 hover:border-primary/30 rounded-[20px] p-6 mb-8 shadow-[0_4px_24px_-10px_rgba(0,0,0,0.05)] transition-all overflow-hidden relative">
+                <div className="group bg-linear-to-br from-bg-card to-bg border border-border/90 ring-1 ring-border/35 hover:border-primary/35 rounded-[20px] p-6 mb-8 shadow-[0_4px_24px_-10px_rgba(0,0,0,0.05)] transition-all overflow-hidden relative">
                     <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-48 h-48 bg-primary/5 rounded-full blur-[80px]" />
                     <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-primary/10 rounded-[14px] flex items-center justify-center flex-shrink-0 animate-pulse-slow">
+                            <div className="w-12 h-12 bg-primary/10 rounded-[14px] flex items-center justify-center shrink-0 animate-pulse-slow">
                                 <Calendar className="w-6 h-6 text-primary" />
                             </div>
                             <div className="max-w-md">
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
                             {showGoogleCta && (
                                 <Link
                                     href="/api/auth/calendar/google/init?next=%2Fdashboard"
-                                    className="group/btn flex items-center gap-3 bg-bg-card border border-border/80 hover:border-primary/50 hover:shadow-lg text-text font-bold px-5 py-3.5 rounded-[16px] text-sm transition-all active:scale-[0.97] min-w-[170px] md:max-w-[200px]"
+                                    className="group/btn flex items-center gap-3 bg-bg-card border border-border/90 ring-1 ring-border/30 hover:border-primary/50 hover:shadow-lg text-text font-bold px-5 py-3.5 rounded-2xl text-sm transition-all active:scale-[0.97] min-w-42.5 md:max-w-50"
                                 >
                                     <div className="w-8 h-8 rounded-[10px] bg-bg flex items-center justify-center shrink-0 border border-border/40 group-hover/btn:scale-110 transition-transform">
                                         <svg className="w-4 h-4" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
                             {showOutlookCta && (
                                 <Link
                                     href="/api/auth/calendar/outlook/init?next=%2Fdashboard"
-                                    className="group/btn flex items-center gap-3 bg-[#0072C6]/5 hover:bg-[#0072C6]/10 border border-[#0072C6]/20 hover:border-[#0072C6]/40 hover:shadow-lg text-[#0060ac] dark:text-[#9ed6ff] dark:bg-[#7fc8ff]/15 dark:hover:bg-[#7fc8ff]/25 dark:border-[#7fc8ff]/35 dark:hover:border-[#7fc8ff]/50 font-bold px-5 py-3.5 rounded-[16px] text-sm transition-all active:scale-[0.97] min-w-[170px] md:max-w-[200px]"
+                                    className="group/btn flex items-center gap-3 bg-[#0072C6]/5 hover:bg-[#0072C6]/10 border border-[#0072C6]/20 hover:border-[#0072C6]/40 hover:shadow-lg text-[#0060ac] dark:text-[#9ed6ff] dark:bg-[#7fc8ff]/15 dark:hover:bg-[#7fc8ff]/25 dark:border-[#7fc8ff]/35 dark:hover:border-[#7fc8ff]/50 font-bold px-5 py-3.5 rounded-2xl text-sm transition-all active:scale-[0.97] min-w-42.5 md:max-w-50"
                                 >
                                     <div className="w-8 h-8 rounded-[10px] bg-bg-card flex items-center justify-center shrink-0 border border-[#0072C6]/10 dark:border-[#7fc8ff]/30 group-hover/btn:scale-110 transition-transform">
                                         <img src="/icons/outlook.svg" alt="Outlook" className="w-5 h-5" />
@@ -137,7 +137,7 @@ export default async function DashboardPage() {
             )}
 
             {/* Usage Meter */}
-            <div className="bg-bg-card border border-border rounded-[16px] p-5">
+            <div className="bg-bg-card border border-border/90 ring-1 ring-border/35 rounded-2xl p-5">
                 <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-medium text-text">Monthly Parses</span>
                     <span className="text-sm text-text-muted">
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
                 </div>
 
                 {!sessions || sessions.length === 0 ? (
-                    <div className="bg-bg-card border border-border rounded-[16px] p-8 text-center">
+                    <div className="bg-bg-card border border-border/90 ring-1 ring-border/35 rounded-2xl p-8 text-center">
                         <p className="text-text-muted text-sm">
                             No parses yet. Upload your first schedule to get started!
                         </p>
